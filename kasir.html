@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kasir POS - Kasir Pintar</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="theme-teal-ocean">
+
+  <!-- NAVBAR BERSAMA -->
+  <header class="app-navbar">
+    <div class="nav-left">
+      <div class="nav-brand">
+        <div class="nav-logo-icon">
+          <i data-lucide="store"></i>
+        </div>
+        <div class="nav-brand-text">
+          <div class="brand-title">KASIR <span class="brand-highlight">PINTAR</span></div>
+          <div class="brand-school" id="navSchoolName">SMA Negeri 1 Harapan Bangsa</div>
+        </div>
+      </div>
+
+      <nav class="nav-links">
+        <a href="dashboard.html" class="nav-tab" data-tab="dashboard">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="kasir.html" class="nav-tab active nav-tab-bright" data-tab="kasir">
+          <i data-lucide="shopping-cart"></i>
+          <span>Kasir POS</span>
+          <span class="nav-badge-bright">Katalog Foto</span>
+        </a>
+        <a href="barang.html" class="nav-tab" data-tab="inventory">
+          <i data-lucide="package"></i>
+          <span>Manajemen Barang</span>
+        </a>
+        <a href="transaksi.html" class="nav-tab" data-tab="transactions">
+          <i data-lucide="receipt"></i>
+          <span>Riwayat Transaksi</span>
+        </a>
+        <a href="database.html" class="nav-tab" data-tab="erd">
+          <i data-lucide="database"></i>
+          <span>Database ERD</span>
+        </a>
+      </nav>
+    </div>
+
+    <div class="nav-right">
+      <div class="clock-badge">
+        <i data-lucide="clock"></i>
+        <span id="systemClock">00:00:00</span>
+      </div>
+
+      <button class="icon-circle-btn" id="soundToggleBtn" onclick="toggleAudio()" title="Suara Kasir On/Off">
+        <i data-lucide="volume-2" id="soundIcon"></i>
+      </button>
+
+      <div class="user-profile-badge">
+        <div class="user-avatar" id="navUserAvatar">K</div>
+        <div class="user-details">
+          <div class="user-name" id="navUserName">Rina Kasir</div>
+          <span class="user-role-tag" id="navUserRole">Kasir</span>
+        </div>
+      </div>
+
+      <button class="btn-logout" onclick="logout()" title="Keluar dari sistem">
+        <i data-lucide="log-out"></i>
+        <span>Keluar</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- KONTEN KASIR POS (LAYAR CERAH DENGAN FOTO PRODUK) -->
+  <main class="view-teal-pos">
+    <div class="teal-pos-layout">
+      
+      <!-- LEFT: PRODUCT CATALOG & BARCODE SCANNER -->
+      <div class="pos-catalog-pane">
+        <div class="pos-controls-card">
+          <div class="pos-search-bar">
+            <div class="search-input-wrap">
+              <i data-lucide="search" class="search-icon"></i>
+              <input type="text" id="posSearchInput" placeholder="Cari nama barang atau ketik barcode..." oninput="handlePosSearch()" />
+              <button type="button" class="btn-clear-search" onclick="clearPosSearch()">&times;</button>
+            </div>
+            <div class="barcode-quick-input">
+              <i data-lucide="barcode"></i>
+              <input type="text" id="posBarcodeDirect" placeholder="Scan Barcode (Enter)..." onkeydown="handleBarcodeEnter(event)" />
+            </div>
+          </div>
+
+          <!-- Category Pills -->
+          <div class="teal-category-pills" id="posCategoryPills">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+
+        <!-- Products Grid with High-Res Photo Cards -->
+        <div class="pos-products-grid" id="posProductsGrid">
+          <!-- Dynamically populated with photos -->
+        </div>
+
+        <div class="pos-catalog-footer" style="padding: 12px 20px; border-top: 1px solid #e2e8f0; background: #ffffff; display: flex; align-items: center; justify-content: space-between;">
+          <div class="catalog-summary-text" id="posCatalogCountText" style="font-weight: 700; color: #64748b;">Menampilkan 0 produk</div>
+          <a href="barang.html" class="btn-teal-outline" style="padding: 6px 12px; font-size: 0.8rem;">
+            <i data-lucide="plus"></i>
+            <span>Tambah Produk Baru</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- RIGHT: TRANSACTION CART & CHECKOUT -->
+      <div class="pos-cart-pane">
+        <div class="pos-cart-card">
+          <!-- Cart Header -->
+          <div class="cart-card-header">
+            <div class="cart-title-wrap">
+              <i data-lucide="shopping-bag" class="cart-icon"></i>
+              <div>
+                <h3 class="cart-title">Meja Transaksi</h3>
+                <span class="cart-subtitle font-mono" id="posActiveInvoice">Faktur: Menunggu</span>
+              </div>
+            </div>
+            <button class="btn-reset-cart" onclick="clearCart()" title="Kosongkan Keranjang">
+              <i data-lucide="trash-2"></i>
+            </button>
+          </div>
+
+          <!-- Customer Selector -->
+          <div class="cart-customer-bar">
+            <div class="customer-select-wrap">
+              <label><i data-lucide="user"></i> Pelanggan:</label>
+              <select id="posCustomerSelect" class="form-select-teal" onchange="handleCustomerChange()">
+                <!-- Options populated from tb_pelanggan -->
+              </select>
+            </div>
+            <div class="customer-type-badge" id="posCustomerGroupBadge">Umum</div>
+          </div>
+
+          <!-- Cart Item List Table -->
+          <div class="cart-items-container">
+            <div class="cart-table-header">
+              <span class="col-item">Item Barang</span>
+              <span class="col-qty">Jumlah</span>
+              <span class="col-price">Harga</span>
+              <span class="col-subtotal">Subtotal</span>
+              <span class="col-action"></span>
+            </div>
+
+            <div class="cart-items-list" id="posCartItemsList">
+              <!-- Injected via JS -->
+            </div>
+          </div>
+
+          <!-- Cart Calculation Summary -->
+          <div class="cart-summary-box">
+            <div class="summary-row">
+              <span>Subtotal Item:</span>
+              <span class="font-mono font-bold text-dark" id="posSubtotalDisplay">Rp 0</span>
+            </div>
+            <div class="summary-row">
+              <span class="discount-label" style="display: flex; align-items: center; gap: 4px; font-weight: 600;">
+                <i data-lucide="tag"></i> Diskon Tambahan:
+              </span>
+              <div class="inline-discount-input" style="display: flex; align-items: center; gap: 4px;">
+                <input type="number" id="posDiscountInput" value="0" min="0" oninput="calculateCartTotals()" placeholder="0" style="width: 70px; padding: 4px 6px; border: 1.5px solid #cbd5e1; border-radius: 4px; text-align: right; font-family: var(--font-mono); font-weight: 700;" />
+                <select id="posDiscountType" onchange="calculateCartTotals()" style="padding: 4px 6px; border: 1.5px solid #cbd5e1; border-radius: 4px; font-weight: 700;">
+                  <option value="nominal">Rp</option>
+                  <option value="persen">%</option>
+                </select>
+              </div>
+            </div>
+            <div class="summary-total-banner">
+              <div class="total-label-group">
+                <span class="total-title">TOTAL BAYAR</span>
+                <span class="total-items-badge" id="posTotalItemBadge">0 Item</span>
+              </div>
+              <div class="total-amount-display" id="posGrandTotalDisplay">Rp 0</div>
+            </div>
+
+            <!-- Pay Button (Triggers White-Blue Payment Modal) -->
+            <button class="btn-checkout-teal" id="btnOpenPayment" onclick="openPaymentModal()" disabled>
+              <i data-lucide="wallet-cards"></i>
+              <span>PROSES PEMBAYARAN</span>
+              <i data-lucide="arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL PEMBAYARAN: DOMINAN PUTIH DAN BIRU -->
+  <div id="paymentModal" class="modal-overlay payment-theme" style="display: none;">
+    <div class="payment-modal-card">
+      <div class="payment-modal-header">
+        <div class="payment-header-left">
+          <div class="payment-icon-circle">
+            <i data-lucide="credit-card"></i>
+          </div>
+          <div>
+            <h3 class="payment-modal-title">Pembayaran Transaksi</h3>
+            <p class="payment-modal-subtitle" id="payModalInvoiceRef">Faktur: INV/20260909/0001</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="closePaymentModal()">&times;</button>
+      </div>
+
+      <div class="payment-modal-body">
+        <div class="payment-bill-banner">
+          <div class="bill-info-sub">Total Tagihan Yang Harus Dibayar:</div>
+          <div class="bill-amount" id="payModalBillAmount">Rp 0</div>
+          <div class="bill-details-row" style="display: flex; gap: 20px; font-size: 0.82rem; border-top: 1px solid rgba(255, 255, 255, 0.2); padding-top: 8px;">
+            <span>Pelanggan: <strong id="payModalCustomerName">Umum</strong></span>
+            <span>Kasir: <strong id="payModalCashierName">Rina Kasir</strong></span>
+          </div>
+        </div>
+
+        <div class="payment-methods-nav">
+          <button type="button" class="pay-method-tab active" data-method="tunai" onclick="selectPaymentMethod('tunai')">
+            <i data-lucide="banknote"></i>
+            <span>Tunai (Cash)</span>
+          </button>
+          <button type="button" class="pay-method-tab" data-method="qris" onclick="selectPaymentMethod('qris')">
+            <i data-lucide="qr-code"></i>
+            <span>QRIS Dinamis</span>
+          </button>
+          <button type="button" class="pay-method-tab" data-method="debit" onclick="selectPaymentMethod('debit')">
+            <i data-lucide="credit-card"></i>
+            <span>Kartu Debit</span>
+          </button>
+          <button type="button" class="pay-method-tab" data-method="kredit" onclick="selectPaymentMethod('kredit')">
+            <i data-lucide="wallet"></i>
+            <span>Kartu Kredit</span>
+          </button>
+        </div>
+
+        <div class="payment-tabs-container">
+          <!-- TUNAI -->
+          <div id="payContent-tunai" class="pay-tab-panel active">
+            <div class="form-group">
+              <label class="pay-form-label" style="font-weight: 800; color: #0369a1; display: block; margin-bottom: 6px;">Uang Tunai Diterima (Rp)</label>
+              <div class="pay-input-with-currency" style="display: flex; align-items: center; background: #f8fafc; border: 2px solid #bfdbfe; border-radius: 8px; padding: 6px 12px;">
+                <span class="currency-prefix" style="font-weight: 800; color: #0284c7; font-size: 1.2rem; margin-right: 8px;">Rp</span>
+                <input type="number" id="cashReceivedInput" class="pay-form-control font-mono font-bold" placeholder="0" oninput="calculateCashChange()" style="width: 100%; border: none; background: transparent; font-size: 1.4rem; font-weight: 800;" />
+              </div>
+            </div>
+
+            <div class="quick-cash-row">
+              <button type="button" class="btn-cash-quick" onclick="setCashReceived('exact')">Uang Pas</button>
+              <button type="button" class="btn-cash-quick" onclick="addCashReceived(10000)">+10.000</button>
+              <button type="button" class="btn-cash-quick" onclick="setCashReceived(20000)">20.000</button>
+              <button type="button" class="btn-cash-quick" onclick="setCashReceived(50000)">50.000</button>
+              <button type="button" class="btn-cash-quick" onclick="setCashReceived(100000)">100.000</button>
+              <button type="button" class="btn-cash-quick" onclick="setCashReceived(200000)">200.000</button>
+            </div>
+
+            <div class="change-status-box" id="cashChangeBox" style="background: #f0fdf4; border: 2px solid #86efac; border-radius: 12px; padding: 16px; text-align: center;">
+              <div class="change-label" style="font-size: 0.8rem; font-weight: 800; color: #15803d; text-transform: uppercase;">Kembalian:</div>
+              <div class="change-value font-mono" id="cashChangeDisplay" style="font-size: 1.8rem; font-weight: 800; color: #166534; margin: 2px 0;">Rp 0</div>
+              <div class="change-note" id="cashChangeNote" style="font-size: 0.78rem; color: #64748b;">Uang yang diterima sudah mencukupi</div>
+            </div>
+          </div>
+
+          <!-- QRIS -->
+          <div id="payContent-qris" class="pay-tab-panel" style="display: none;">
+            <div class="qris-card-wrapper">
+              <div class="qris-top-bar" style="width: 100%; display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+                <div class="qris-brand">
+                  <span class="qris-text-red" style="color: #dc2626; font-weight: 900;">Q</span><span class="qris-text-black" style="font-weight: 900;">RIS</span>
+                  <span class="qris-sub" style="display: block; font-size: 0.68rem; color: #64748b;">Pembayaran Digital Nasional</span>
+                </div>
+                <div class="qris-timer-badge" style="display: inline-flex; align-items: center; gap: 6px; background: #fee2e2; color: #b91c1c; padding: 4px 10px; border-radius: 9999px; font-family: var(--font-mono); font-size: 0.8rem; font-weight: 800;">
+                  <i data-lucide="timer"></i>
+                  <span id="qrisTimerDisplay">05:00</span>
+                </div>
+              </div>
+
+              <div class="qris-qr-frame" style="position: relative; background: #ffffff; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; margin-bottom: 12px;">
+                <svg id="qrisSvgQr" viewBox="0 0 200 200" width="180" height="180"></svg>
+                <div class="qris-center-badge" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 4px 8px; border-radius: 4px; border: 1.5px solid #dc2626; font-weight: 900; font-size: 0.72rem; color: #dc2626;">
+                  <span>QRIS</span>
+                </div>
+              </div>
+
+              <div class="qris-info-text">
+                <div class="merchant-name" id="qrisMerchantName" style="font-weight: 800; color: #0369a1;">SMA N 1 HARAPAN BANGSA</div>
+                <div class="merchant-nmid" style="font-size: 0.75rem; font-family: var(--font-mono); color: #64748b;">NMID: ID1020304050607</div>
+                <div class="qris-amount-bold font-mono" id="qrisAmountDisplay" style="font-size: 1.3rem; font-weight: 800; color: #0284c7; margin: 6px 0 14px;">Rp 0</div>
+              </div>
+
+              <div class="qris-simulation-box" style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
+                <button type="button" class="btn-primary-teal" id="btnSimulateQris" onclick="simulateQrisPayment()" style="justify-content: center; width: 100%;">
+                  <i data-lucide="smartphone"></i>
+                  <span>Simulasikan Pembeli Scan & Bayar</span>
+                </button>
+                <div class="qris-status-pill" id="qrisStatusPill" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.84rem; font-weight: 700; color: #64748b;">
+                  <span class="status-indicator-dot waiting" style="width: 10px; height: 10px; border-radius: 50%; background: #f59e0b;"></span>
+                  <span id="qrisStatusText">Menunggu Pembayaran...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- DEBIT -->
+          <div id="payContent-debit" class="pay-tab-panel" style="display: none;">
+            <div class="edc-simulator-card">
+              <div class="edc-card-header" style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #99f6e4; padding-bottom: 10px; margin-bottom: 14px;">
+                <div class="edc-title" style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 800; color: var(--teal-900);">
+                  <i data-lucide="terminal"></i>
+                  <span>TERMINAL EDC PERBANKAN</span>
+                </div>
+                <div class="edc-status-badge" style="font-size: 0.7rem; font-weight: 800; background: #ccfbf1; color: var(--teal-800); padding: 2px 8px; border-radius: 9999px;">ONLINE</div>
+              </div>
+
+              <div class="form-group">
+                <label class="pay-form-label" style="font-weight: 700; color: var(--teal-900); display: block; margin-bottom: 6px;">Pilih Bank Penerbit</label>
+                <div class="bank-options-grid" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px;">
+                  <label class="bank-pill-label"><input type="radio" name="debitBank" value="BCA" checked style="display:none;" /><span class="bank-chip" style="display:block; text-align:center; padding:8px 4px; border-radius:6px; background:white; border:1px solid #cbd5e1; font-weight:700; font-size:0.78rem;">BCA</span></label>
+                  <label class="bank-pill-label"><input type="radio" name="debitBank" value="Mandiri" style="display:none;" /><span class="bank-chip" style="display:block; text-align:center; padding:8px 4px; border-radius:6px; background:white; border:1px solid #cbd5e1; font-weight:700; font-size:0.78rem;">Mandiri</span></label>
+                  <label class="bank-pill-label"><input type="radio" name="debitBank" value="BRI" style="display:none;" /><span class="bank-chip" style="display:block; text-align:center; padding:8px 4px; border-radius:6px; background:white; border:1px solid #cbd5e1; font-weight:700; font-size:0.78rem;">BRI</span></label>
+                  <label class="bank-pill-label"><input type="radio" name="debitBank" value="BNI" style="display:none;" /><span class="bank-chip" style="display:block; text-align:center; padding:8px 4px; border-radius:6px; background:white; border:1px solid #cbd5e1; font-weight:700; font-size:0.78rem;">BNI</span></label>
+                  <label class="bank-pill-label"><input type="radio" name="debitBank" value="CIMB" style="display:none;" /><span class="bank-chip" style="display:block; text-align:center; padding:8px 4px; border-radius:6px; background:white; border:1px solid #cbd5e1; font-weight:700; font-size:0.78rem;">CIMB</span></label>
+                  <label class="bank-pill-label"><input type="radio" name="debitBank" value="BSI" style="display:none;" /><span class="bank-chip" style="display:block; text-align:center; padding:8px 4px; border-radius:6px; background:white; border:1px solid #cbd5e1; font-weight:700; font-size:0.78rem;">BSI</span></label>
+                </div>
+              </div>
+
+              <div class="form-row-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div class="form-group">
+                  <label class="pay-form-label" style="font-weight: 700; color: var(--teal-900);">Nomor Kartu Debit</label>
+                  <input type="text" id="debitCardNumber" class="form-control font-mono" value="4532 8901 2345 6789" style="background: white;" />
+                </div>
+                <div class="form-group">
+                  <label class="pay-form-label" style="font-weight: 700; color: var(--teal-900);">Nama Pemegang Kartu</label>
+                  <input type="text" id="debitCardHolder" class="form-control" value="PEMEGANG KARTU" style="background: white;" />
+                </div>
+              </div>
+
+              <div class="edc-action-footer">
+                <button type="button" class="btn-primary-teal" id="btnProcessDebit" onclick="processDebitEdc()" style="width: 100%; justify-content: center; margin-top: 10px;">
+                  <i data-lucide="radio"></i>
+                  <span>Gesek / Masukkan Kartu (Proses EDC)</span>
+                </button>
+                <div class="edc-approval-box" id="debitApprovalBox" style="display: none; background: #ccfbf1; border: 1.5px solid #2dd4bf; border-radius: 8px; padding: 10px; margin-top: 10px; text-align: center;">
+                  <span class="approval-title" style="font-size: 0.75rem; font-weight: 800; color: #0f766e;">APPROVAL SUCCESS</span>
+                  <div class="approval-code font-mono" id="debitApprovalCode" style="font-size: 1.1rem; font-weight: 800; color: #042f2e;">APPR: 839201</div>
+                  <small class="trace-no" id="debitTraceNo" style="font-size: 0.72rem; color: #64748b; font-family: var(--font-mono);">TRACE: 004921 | TID: EDC-001</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- KREDIT -->
+          <div id="payContent-kredit" class="pay-tab-panel" style="display: none;">
+            <div class="credit-simulator-card">
+              <div class="form-group">
+                <label class="pay-form-label" style="font-weight: 700; color: var(--teal-900);">Jaringan Kartu</label>
+                <div class="credit-network-row" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+                  <label class="network-chip active"><input type="radio" name="creditNetwork" value="Visa" checked style="display:none;" /><span>VISA</span></label>
+                  <label class="network-chip"><input type="radio" name="creditNetwork" value="Mastercard" style="display:none;" /><span>Mastercard</span></label>
+                  <label class="network-chip"><input type="radio" name="creditNetwork" value="JCB" style="display:none;" /><span>JCB</span></label>
+                  <label class="network-chip"><input type="radio" name="creditNetwork" value="Amex" style="display:none;" /><span>AMEX</span></label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="pay-form-label" style="font-weight: 700; color: var(--teal-900);">Pilihan Tenor Pembayaran</label>
+                <select id="creditTenorSelect" class="form-control" onchange="calculateCreditInstallment()" style="background: white;">
+                  <option value="1">Bayar Penuh / Full Payment (1x)</option>
+                  <option value="3">Cicilan 3 Bulan (Bunga 0%)</option>
+                  <option value="6">Cicilan 6 Bulan (Bunga 0%)</option>
+                  <option value="12">Cicilan 12 Bulan (Bunga 0%)</option>
+                </select>
+              </div>
+
+              <div class="credit-installment-box" style="background: #f0fdfa; border: 1.5px dashed var(--teal-300); border-radius: 8px; padding: 12px; margin: 12px 0;">
+                <div class="installment-row" style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
+                  <span>Tenor:</span>
+                  <strong id="creditTenorDisplay">1 Bulan (Bayar Penuh)</strong>
+                </div>
+                <div class="installment-row" style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+                  <span>Cicilan per Bulan:</span>
+                  <strong class="font-mono" id="creditMonthlyDisplay" style="color: #0284c7;">Rp 0 / bln</strong>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="pay-form-label" style="font-weight: 700; color: var(--teal-900);">Nomor Kartu Kredit</label>
+                <input type="text" id="creditCardNumber" class="form-control font-mono" value="5120 7890 1234 5678" style="background: white;" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="payment-modal-footer">
+        <button type="button" class="btn-cancel-pay" onclick="closePaymentModal()">Batal</button>
+        <button type="button" class="btn-confirm-pay" id="btnConfirmPayment" onclick="completeTransaction()">
+          <i data-lucide="check-circle-2"></i>
+          <span>Konfirmasi & Selesaikan Transaksi</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STRUK RECEIPT THERMAL -->
+  <div id="receiptModal" class="modal-overlay" style="display: none;">
+    <div class="receipt-modal-container">
+      <div class="thermal-receipt" id="thermalReceiptContent">
+        <div class="receipt-header">
+          <div class="receipt-school-title" id="rcptSchoolTitle">SMA NEGERI 1 HARAPAN BANGSA</div>
+          <div class="receipt-school-address" id="rcptSchoolAddress">Jl. Pendidikan No. 45, Jakarta</div>
+          <div class="receipt-school-phone">Telp: (021) 7890-1234 | POS V2.0</div>
+          <div class="receipt-divider">================================</div>
+        </div>
+
+        <div class="receipt-meta">
+          <div class="rcpt-row"><span>No. Faktur</span><strong id="rcptInvoiceNo">INV/20260909/0001</strong></div>
+          <div class="rcpt-row"><span>Tanggal</span><span id="rcptDate">09/09/2026 13:45</span></div>
+          <div class="rcpt-row"><span>Kasir</span><span id="rcptCashier">Rina Kasir</span></div>
+          <div class="rcpt-row"><span>Pelanggan</span><span id="rcptCustomer">Umum</span></div>
+          <div class="receipt-divider">--------------------------------</div>
+        </div>
+
+        <div class="receipt-items-list" id="rcptItemsList"></div>
+
+        <div class="receipt-totals">
+          <div class="receipt-divider">--------------------------------</div>
+          <div class="rcpt-row"><span>Subtotal</span><span id="rcptSubtotal">Rp 0</span></div>
+          <div class="rcpt-row" id="rcptDiscountRow" style="display: none;"><span>Diskon</span><span id="rcptDiscount">Rp 0</span></div>
+          <div class="receipt-divider">================================</div>
+          <div class="rcpt-row bold-total"><span>TOTAL TAGIHAN</span><strong id="rcptGrandTotal">Rp 0</strong></div>
+          <div class="rcpt-row"><span>Metode Bayar</span><strong id="rcptPaymentMethod">TUNAI</strong></div>
+          <div class="rcpt-row"><span>Jumlah Bayar</span><span id="rcptTotalPaid">Rp 0</span></div>
+          <div class="rcpt-row"><span>Kembalian</span><span id="rcptChange">Rp 0</span></div>
+          <div class="receipt-divider">================================</div>
+        </div>
+
+        <div class="receipt-footer">
+          <p>Terima Kasih Telah Berbelanja!</p>
+          <p>Barang yang sudah dibeli tidak dapat ditukar kecuali ada perjanjian.</p>
+          <div class="barcode-graphic-sim">||| | |||| | ||| || |||| | |||</div>
+          <small id="rcptTimestamp">09/09/2026 13:45:00 WIB</small>
+        </div>
+      </div>
+
+      <div class="receipt-actions-row">
+        <button type="button" class="btn-rcpt-action print" onclick="window.print()">
+          <i data-lucide="printer"></i>
+          <span>Cetak Struk</span>
+        </button>
+        <button type="button" class="btn-rcpt-action copy" onclick="copyReceiptText()">
+          <i data-lucide="copy"></i>
+          <span>Salin Teks</span>
+        </button>
+        <button type="button" class="btn-rcpt-action close" onclick="closeReceiptModal()">
+          <i data-lucide="plus-circle"></i>
+          <span>Transaksi Baru</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="shared.js"></script>
+  <script>
+    let cart = [];
+    let activeCategoryFilter = 'all';
+    let currentPaymentMethod = 'tunai';
+    let qrisTimerInterval = null;
+    let qrisSecondsRemaining = 300;
+    let lastCompletedSale = null;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initSharedNavbar('kasir');
+      renderPosCatalog();
+      populateCustomerSelect();
+      renderCart();
+      setTimeout(() => {
+        const directInput = document.getElementById('posBarcodeDirect');
+        if (directInput) directInput.focus();
+      }, 100);
+    });
+
+    function renderPosCatalog() {
+      const container = document.getElementById('posProductsGrid');
+      const pillsContainer = document.getElementById('posCategoryPills');
+      if (!container) return;
+
+      if (pillsContainer) {
+        pillsContainer.innerHTML = `
+          <button class="cat-pill ${activeCategoryFilter === 'all' ? 'active' : ''}" onclick="filterPosCategory('all')">
+            <i data-lucide="layout-grid"></i>
+            <span>Semua</span>
+          </button>
+        `;
+        db.tb_kategori.forEach(k => {
+          const btn = document.createElement('button');
+          btn.className = `cat-pill ${activeCategoryFilter === String(k.id_kategori) ? 'active' : ''}`;
+          btn.innerHTML = `<span>${k.nama}</span>`;
+          btn.onclick = () => filterPosCategory(String(k.id_kategori));
+          pillsContainer.appendChild(btn);
+        });
+      }
+
+      const keyword = (document.getElementById('posSearchInput') ? document.getElementById('posSearchInput').value : '').toLowerCase().trim();
+      const activeProducts = db.tb_barang.filter(b => b.is_delete === 0 && b.is_active === 1);
+
+      const filtered = activeProducts.filter(p => {
+        const matchCat = activeCategoryFilter === 'all' || String(p.id_kategori) === activeCategoryFilter;
+        const matchSearch = !keyword || p.nama.toLowerCase().includes(keyword) || p.barcode.includes(keyword);
+        return matchCat && matchSearch;
+      });
+
+      const countText = document.getElementById('posCatalogCountText');
+      if (countText) countText.textContent = `Menampilkan ${filtered.length} dari ${activeProducts.length} produk`;
+
+      container.innerHTML = '';
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #64748b;">
+            <i data-lucide="package-x" style="width: 48px; height: 48px; margin-bottom: 8px; color: #94a3b8;"></i>
+            <p style="font-weight: 800; color: #1e293b; font-size: 1.1rem;">Produk Tidak Ditemukan</p>
+            <small style="color: #64748b;">Coba ubah kata kunci pencarian atau pilih kategori lain.</small>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      filtered.forEach(prod => {
+        const category = db.tb_kategori.find(k => k.id_kategori === prod.id_kategori);
+        const catName = category ? category.nama : 'Umum';
+
+        let stockColor = '#0f766e';
+        let stockBg = '#ccfbf1';
+        if (prod.stok === 0) {
+          stockColor = '#b91c1c';
+          stockBg = '#fee2e2';
+        } else if (prod.stok < 10) {
+          stockColor = '#b45309';
+          stockBg = '#fef3c7';
+        }
+
+        const card = document.createElement('div');
+        card.className = 'product-card-photo';
+        card.onclick = () => addToCart(prod.id_barang);
+
+        card.innerHTML = `
+          <div class="prod-photo-frame">
+            ${prod.foto 
+              ? `<img src="${prod.foto}" class="prod-photo-img" alt="${prod.nama}">` 
+              : `<div class="prod-photo-fallback"><i data-lucide="package"></i></div>`
+            }
+            <span class="prod-floating-cat" style="color: #0f766e;">${catName}</span>
+            <span class="prod-floating-stock" style="background: ${stockBg}; color: ${stockColor};">${prod.stok} ${prod.satuan}</span>
+          </div>
+          <div class="prod-card-body">
+            <div>
+              <h4 class="prod-card-name">${prod.nama}</h4>
+              <div class="prod-card-barcode">${prod.barcode}</div>
+            </div>
+            <div class="prod-card-footer">
+              <div class="prod-card-price">${formatRupiah(prod.harga_jual)}</div>
+              <div class="prod-add-btn-circle" title="Tambah ke keranjang">
+                <i data-lucide="plus"></i>
+              </div>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      lucide.createIcons();
+    }
+
+    function filterPosCategory(catId) {
+      activeCategoryFilter = catId;
+      renderPosCatalog();
+      playSound('click');
+    }
+
+    function handlePosSearch() { renderPosCatalog(); }
+    function clearPosSearch() {
+      const input = document.getElementById('posSearchInput');
+      if (input) input.value = '';
+      renderPosCatalog();
+    }
+
+    function handleBarcodeEnter(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const barcode = e.target.value.trim();
+        if (!barcode) return;
+
+        const product = db.tb_barang.find(b => b.barcode === barcode && b.is_delete === 0);
+        if (product) {
+          addToCart(product.id_barang);
+          e.target.value = '';
+        } else {
+          playSound('error');
+          showToast(`Produk dengan barcode ${barcode} tidak ditemukan!`, 'error');
+        }
+      }
+    }
+
+    function addToCart(productId) {
+      const product = db.tb_barang.find(b => b.id_barang === productId);
+      if (!product) return;
+
+      if (product.stok <= 0) {
+        playSound('error');
+        showToast(`Stok ${product.nama} habis!`, 'error');
+        return;
+      }
+
+      const existingItem = cart.find(item => item.id_barang === productId);
+      if (existingItem) {
+        if (existingItem.qty + 1 > product.stok) {
+          playSound('error');
+          showToast(`Jumlah melebihi stok yang tersedia (${product.stok})!`, 'error');
+          return;
+        }
+        existingItem.qty += 1;
+      } else {
+        cart.push({
+          id_barang: product.id_barang,
+          barcode: product.barcode,
+          nama: product.nama,
+          harga_beli: product.harga_beli,
+          harga_jual: product.harga_jual,
+          satuan: product.satuan,
+          foto: product.foto || '',
+          qty: 1
+        });
+      }
+
+      playSound('beep');
+      renderCart();
+    }
+
+    function updateCartQty(productId, delta) {
+      const item = cart.find(i => i.id_barang === productId);
+      const product = db.tb_barang.find(b => b.id_barang === productId);
+      if (!item) return;
+
+      const newQty = item.qty + delta;
+      if (newQty <= 0) {
+        removeFromCart(productId);
+        return;
+      }
+
+      if (product && newQty > product.stok) {
+        playSound('error');
+        showToast(`Maksimal stok tersedia adalah ${product.stok}`, 'error');
+        return;
+      }
+
+      item.qty = newQty;
+      playSound('click');
+      renderCart();
+    }
+
+    function removeFromCart(productId) {
+      cart = cart.filter(i => i.id_barang !== productId);
+      playSound('click');
+      renderCart();
+    }
+
+    function clearCart() {
+      if (cart.length === 0) return;
+      if (confirm('Kosongkan semua item di keranjang?')) {
+        cart = [];
+        playSound('click');
+        renderCart();
+      }
+    }
+
+    function renderCart() {
+      const listContainer = document.getElementById('posCartItemsList');
+      const checkoutBtn = document.getElementById('btnOpenPayment');
+      const invoiceSubtitle = document.getElementById('posActiveInvoice');
+
+      if (invoiceSubtitle) {
+        const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+        const nextId = (db.tb_penjualan.length + 1).toString().padStart(4, '0');
+        invoiceSubtitle.textContent = `Faktur: INV/${today}/${nextId}`;
+      }
+
+      if (!listContainer) return;
+
+      if (cart.length === 0) {
+        listContainer.innerHTML = `
+          <div class="cart-empty-state">
+            <i data-lucide="shopping-cart"></i>
+            <p class="natural-heading-sm">Keranjang masih kosong</p>
+            <small class="natural-subtext">Klik foto produk di sebelah kiri atau scan barcode untuk menambah item</small>
+          </div>
+        `;
+        if (checkoutBtn) checkoutBtn.disabled = true;
+        calculateCartTotals();
+        lucide.createIcons();
+        return;
+      }
+
+      if (checkoutBtn) checkoutBtn.disabled = false;
+
+      listContainer.innerHTML = '';
+      cart.forEach(item => {
+        const subtotal = item.qty * item.harga_jual;
+        const row = document.createElement('div');
+        row.className = 'cart-item-row';
+        row.innerHTML = `
+          <div class="cart-item-product-cell">
+            ${item.foto 
+              ? `<img src="${item.foto}" class="cart-item-thumb" alt="Item">` 
+              : `<div class="cart-item-thumb-fallback"><i data-lucide="package"></i></div>`
+            }
+            <div>
+              <div class="cart-item-name">${item.nama}</div>
+              <div class="cart-item-barcode">${item.barcode}</div>
+            </div>
+          </div>
+          <div>
+            <div class="qty-control-group">
+              <button class="btn-qty" onclick="updateCartQty(${item.id_barang}, -1)">&minus;</button>
+              <span class="qty-number">${item.qty}</span>
+              <button class="btn-qty" onclick="updateCartQty(${item.id_barang}, 1)">&plus;</button>
+            </div>
+          </div>
+          <div class="font-mono text-dark">${formatRupiah(item.harga_jual)}</div>
+          <div class="font-mono font-bold" style="color: #0f766e;">${formatRupiah(subtotal)}</div>
+          <button class="btn-remove-item" onclick="removeFromCart(${item.id_barang})" title="Hapus Item">
+            <i data-lucide="x"></i>
+          </button>
+        `;
+        listContainer.appendChild(row);
+      });
+
+      calculateCartTotals();
+      lucide.createIcons();
+    }
+
+    function calculateCartTotals() {
+      const subtotal = cart.reduce((sum, item) => sum + (item.qty * item.harga_jual), 0);
+      const discountInput = document.getElementById('posDiscountInput');
+      const discountType = document.getElementById('posDiscountType');
+
+      let discountVal = discountInput ? Number(discountInput.value) || 0 : 0;
+      let discountNominal = 0;
+
+      if (discountType && discountType.value === 'persen') {
+        discountNominal = (subtotal * discountVal) / 100;
+      } else {
+        discountNominal = discountVal;
+      }
+
+      if (discountNominal > subtotal) discountNominal = subtotal;
+
+      const grandTotal = Math.max(0, subtotal - discountNominal);
+      const totalItemCount = cart.reduce((sum, item) => sum + item.qty, 0);
+
+      document.getElementById('posSubtotalDisplay').textContent = formatRupiah(subtotal);
+      document.getElementById('posTotalItemBadge').textContent = `${totalItemCount} Item`;
+      document.getElementById('posGrandTotalDisplay').textContent = formatRupiah(grandTotal);
+
+      return { subtotal, discountNominal, grandTotal, totalItemCount };
+    }
+
+    function populateCustomerSelect() {
+      const select = document.getElementById('posCustomerSelect');
+      if (!select) return;
+      select.innerHTML = '';
+      db.tb_pelanggan.filter(p => p.is_delete === 0).forEach(cust => {
+        const opt = document.createElement('option');
+        opt.value = cust.id_pelanggan;
+        opt.textContent = cust.nama_pelanggan;
+        select.appendChild(opt);
+      });
+      handleCustomerChange();
+    }
+
+    function handleCustomerChange() {
+      const select = document.getElementById('posCustomerSelect');
+      const badge = document.getElementById('posCustomerGroupBadge');
+      if (!select || !badge) return;
+
+      const custId = Number(select.value);
+      const cust = db.tb_pelanggan.find(p => p.id_pelanggan === custId);
+      if (cust) {
+        const grp = db.tb_kelompok_pelanggan.find(g => g.id_kelompok_pelanggan === cust.id_kelompok_pelanggan);
+        badge.textContent = grp ? grp.nama_kelompok : 'Pelanggan';
+      }
+    }
+
+    // --- PEMBAYARAN ---
+    function openPaymentModal() {
+      if (cart.length === 0) {
+        showToast('Keranjang belanja kosong!', 'error');
+        return;
+      }
+
+      const totals = calculateCartTotals();
+      const invoiceNo = document.getElementById('posActiveInvoice').textContent.replace('Faktur: ', '');
+      const custSelect = document.getElementById('posCustomerSelect');
+      const custName = custSelect ? custSelect.options[custSelect.selectedIndex].text : 'Umum';
+      const user = getCurrentUser();
+
+      document.getElementById('payModalInvoiceRef').textContent = invoiceNo;
+      document.getElementById('payModalBillAmount').textContent = formatRupiah(totals.grandTotal);
+      document.getElementById('payModalCustomerName').textContent = custName;
+      document.getElementById('payModalCashierName').textContent = user ? user.nama_lengkap : 'Kasir';
+
+      document.getElementById('cashReceivedInput').value = totals.grandTotal;
+      calculateCashChange();
+      initQrisPayment(totals.grandTotal);
+      calculateCreditInstallment();
+
+      document.getElementById('paymentModal').style.display = 'flex';
+      selectPaymentMethod('tunai');
+      playSound('click');
+      lucide.createIcons();
+    }
+
+    function closePaymentModal() {
+      document.getElementById('paymentModal').style.display = 'none';
+      if (qrisTimerInterval) clearInterval(qrisTimerInterval);
+    }
+
+    function selectPaymentMethod(method) {
+      currentPaymentMethod = method;
+      document.querySelectorAll('.pay-method-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.getAttribute('data-method') === method);
+      });
+      document.querySelectorAll('.pay-tab-panel').forEach(panel => {
+        panel.style.display = 'none';
+      });
+      const activePanel = document.getElementById(`payContent-${method}`);
+      if (activePanel) activePanel.style.display = 'block';
+
+      playSound('click');
+      lucide.createIcons();
+    }
+
+    function calculateCashChange() {
+      const totals = calculateCartTotals();
+      const receivedInput = document.getElementById('cashReceivedInput');
+      const received = Number(receivedInput.value) || 0;
+      const change = received - totals.grandTotal;
+
+      const changeBox = document.getElementById('cashChangeBox');
+      const changeDisplay = document.getElementById('cashChangeDisplay');
+      const changeNote = document.getElementById('cashChangeNote');
+
+      if (change >= 0) {
+        changeBox.style.borderColor = '#86efac';
+        changeBox.style.background = '#f0fdf4';
+        changeDisplay.textContent = formatRupiah(change);
+        changeDisplay.style.color = '#166534';
+        changeNote.textContent = change === 0 ? 'Uang pas diterima (Tanpa kembalian)' : `Kembalian yang harus diberikan: ${formatRupiah(change)}`;
+      } else {
+        changeBox.style.borderColor = '#fca5a5';
+        changeBox.style.background = '#fef2f2';
+        changeDisplay.textContent = formatRupiah(Math.abs(change));
+        changeDisplay.style.color = '#dc2626';
+        changeNote.textContent = `Uang pembayaran masih kurang sebesar ${formatRupiah(Math.abs(change))}`;
+      }
+    }
+
+    function setCashReceived(val) {
+      const totals = calculateCartTotals();
+      const input = document.getElementById('cashReceivedInput');
+      input.value = (val === 'exact') ? totals.grandTotal : val;
+      calculateCashChange();
+      playSound('click');
+    }
+
+    function addCashReceived(amount) {
+      const input = document.getElementById('cashReceivedInput');
+      input.value = (Number(input.value) || 0) + amount;
+      calculateCashChange();
+      playSound('click');
+    }
+
+    function initQrisPayment(amount) {
+      document.getElementById('qrisAmountDisplay').textContent = formatRupiah(amount);
+      const merchantName = (db.tb_sekolah[0] && db.tb_sekolah[0].nama_sekolah) ? db.tb_sekolah[0].nama_sekolah.toUpperCase() : 'SMA N 1 HARAPAN BANGSA';
+      document.getElementById('qrisMerchantName').textContent = merchantName;
+
+      const statusPill = document.getElementById('qrisStatusPill');
+      statusPill.innerHTML = `
+        <span class="status-indicator-dot waiting" style="width:10px; height:10px; border-radius:50%; background:#f59e0b;"></span>
+        <span id="qrisStatusText">Menunggu Pembayaran Pembeli...</span>
+      `;
+
+      drawDynamicQrSvg();
+
+      if (qrisTimerInterval) clearInterval(qrisTimerInterval);
+      qrisSecondsRemaining = 300;
+      updateQrisTimer();
+      qrisTimerInterval = setInterval(() => {
+        qrisSecondsRemaining--;
+        if (qrisSecondsRemaining <= 0) {
+          clearInterval(qrisTimerInterval);
+          document.getElementById('qrisTimerDisplay').textContent = '00:00 (Kadaluarsa)';
+        } else {
+          updateQrisTimer();
+        }
+      }, 1000);
+    }
+
+    function updateQrisTimer() {
+      const mins = Math.floor(qrisSecondsRemaining / 60).toString().padStart(2, '0');
+      const secs = (qrisSecondsRemaining % 60).toString().padStart(2, '0');
+      document.getElementById('qrisTimerDisplay').textContent = `${mins}:${secs}`;
+    }
+
+    function drawDynamicQrSvg() {
+      const svg = document.getElementById('qrisSvgQr');
+      if (!svg) return;
+      svg.innerHTML = '';
+      const size = 25;
+      const cellSize = 180 / size;
+
+      for (let r = 0; r < size; r++) {
+        for (let c = 0; c < size; c++) {
+          let isFilled = false;
+          const isTopLeft = (r < 7 && c < 7);
+          const isTopRight = (r < 7 && c >= size - 7);
+          const isBottomLeft = (r >= size - 7 && c < 7);
+
+          if (isTopLeft || isTopRight || isBottomLeft) {
+            const localR = isBottomLeft ? r - (size - 7) : r;
+            const localC = isTopRight ? c - (size - 7) : c;
+            if (localR === 0 || localR === 6 || localC === 0 || localC === 6) isFilled = true;
+            else if (localR >= 2 && localR <= 4 && localC >= 2 && localC <= 4) isFilled = true;
+          } else {
+            isFilled = ((r * 7 + c * 13 + (r % 3) * (c % 5)) % 2 === 0);
+          }
+
+          if (isFilled) {
+            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            rect.setAttribute('x', c * cellSize);
+            rect.setAttribute('y', r * cellSize);
+            rect.setAttribute('width', cellSize);
+            rect.setAttribute('height', cellSize);
+            rect.setAttribute('fill', '#0f172a');
+            svg.appendChild(rect);
+          }
+        }
+      }
+    }
+
+    function simulateQrisPayment() {
+      playSound('beep');
+      const statusPill = document.getElementById('qrisStatusPill');
+      statusPill.innerHTML = `<span>Memproses verifikasi bank...</span>`;
+      setTimeout(() => {
+        playSound('success');
+        statusPill.innerHTML = `
+          <span style="color: #10b981; font-weight: 800;">LUNAS! QRIS Terverifikasi Sukses</span>
+        `;
+        showToast('Pembayaran QRIS berhasil diterima!', 'success');
+      }, 1000);
+    }
+
+    function processDebitEdc() {
+      const btn = document.getElementById('btnProcessDebit');
+      const approvalBox = document.getElementById('debitApprovalBox');
+      btn.innerHTML = `<span>Menghubungi Bank Host...</span>`;
+      playSound('click');
+
+      setTimeout(() => {
+        const apprCode = Math.floor(100000 + Math.random() * 900000);
+        const traceNo = Math.floor(1000 + Math.random() * 9000).toString().padStart(6, '0');
+
+        document.getElementById('debitApprovalCode').textContent = `APPR: ${apprCode}`;
+        document.getElementById('debitTraceNo').textContent = `TRACE: ${traceNo} | MID: 009827163829`;
+        approvalBox.style.display = 'block';
+
+        btn.innerHTML = `<span>Transaksi Debit Berhasil Diotorisasi</span>`;
+        btn.style.background = '#059669';
+
+        playSound('success');
+        showToast('Transaksi kartu debit berhasil diotorisasi!', 'success');
+      }, 1200);
+    }
+
+    function calculateCreditInstallment() {
+      const totals = calculateCartTotals();
+      const tenor = Number(document.getElementById('creditTenorSelect').value) || 1;
+      const monthly = Math.round(totals.grandTotal / tenor);
+
+      document.getElementById('creditTenorDisplay').textContent = tenor === 1 ? '1 Bulan (Bayar Penuh)' : `${tenor} Bulan (Bunga 0%)`;
+      document.getElementById('creditMonthlyDisplay').textContent = `${formatRupiah(monthly)} / bln`;
+    }
+
+    function completeTransaction() {
+      const totals = calculateCartTotals();
+      let paidAmount = totals.grandTotal;
+      let changeAmount = 0;
+      let caraBayar = 'Tunai';
+      let jenisTransaksi = 'tunai';
+
+      if (currentPaymentMethod === 'tunai') {
+        const received = Number(document.getElementById('cashReceivedInput').value) || 0;
+        if (received < totals.grandTotal) {
+          playSound('error');
+          showToast('Uang tunai yang diterima kurang dari total tagihan!', 'error');
+          return;
+        }
+        paidAmount = received;
+        changeAmount = received - totals.grandTotal;
+        caraBayar = 'Tunai';
+        jenisTransaksi = 'tunai';
+      } else if (currentPaymentMethod === 'qris') {
+        caraBayar = 'QRIS';
+        jenisTransaksi = 'tunai';
+      } else if (currentPaymentMethod === 'debit') {
+        const bank = document.querySelector('input[name="debitBank"]:checked')?.value || 'BCA';
+        caraBayar = `Debit ${bank}`;
+        jenisTransaksi = 'tunai';
+      } else if (currentPaymentMethod === 'kredit') {
+        const network = document.querySelector('input[name="creditNetwork"]:checked')?.value || 'Visa';
+        const tenor = document.getElementById('creditTenorSelect').value;
+        caraBayar = `Kredit ${network} (${tenor}x)`;
+        jenisTransaksi = 'kredit';
+      }
+
+      // Kurangi stok
+      cart.forEach(item => {
+        const prod = db.tb_barang.find(b => b.id_barang === item.id_barang);
+        if (prod) {
+          prod.stok = Math.max(0, prod.stok - item.qty);
+        }
+      });
+
+      const newSaleId = db.tb_penjualan.length + 1;
+      const today = new Date();
+      const dateStr = today.toISOString().replace('T', ' ').slice(0, 19);
+      const invoiceNo = document.getElementById('payModalInvoiceRef').textContent;
+      const custSelect = document.getElementById('posCustomerSelect');
+      const custId = custSelect ? Number(custSelect.value) : 1;
+      const user = getCurrentUser();
+
+      const saleRecord = {
+        id_penjualan: newSaleId,
+        id_sekolah: 1,
+        id_user: user ? user.id_user : 1,
+        id_pelanggan: custId,
+        nomor_faktur: invoiceNo,
+        tanggal_penjualan: dateStr,
+        total_faktur: totals.grandTotal,
+        total_bayar: paidAmount,
+        kembalian: changeAmount,
+        status_pembayaran: 'sudah bayar',
+        jenis_transaksi: jenisTransaksi,
+        cara_bayar: caraBayar,
+        note: `Transaksi Kasir (${caraBayar})`,
+        is_delete: 0
+      };
+
+      db.tb_penjualan.push(saleRecord);
+
+      cart.forEach(item => {
+        const detailId = db.tb_detail_penjualan.length + 1;
+        db.tb_detail_penjualan.push({
+          id_detail_penjualan: detailId,
+          id_penjualan: newSaleId,
+          id_barang: item.id_barang,
+          jumlah_barang: item.qty,
+          harga_beli: item.harga_beli,
+          harga_jual: item.harga_jual,
+          diskon_tipe: 'nominal',
+          diskon_nilai: 0,
+          diskon_nominal: 0,
+          subtotal: item.qty * item.harga_jual
+        });
+      });
+
+      saveDatabase();
+
+      lastCompletedSale = {
+        sale: saleRecord,
+        items: [...cart],
+        totals
+      };
+
+      closePaymentModal();
+      cart = [];
+      renderCart();
+      renderPosCatalog();
+
+      playSound('success');
+      showToast('Transaksi Penjualan Berhasil Diselesaikan!', 'success');
+      showReceiptModal(lastCompletedSale);
+    }
+
+    function showReceiptModal(saleData) {
+      const modal = document.getElementById('receiptModal');
+      if (!modal || !saleData) return;
+
+      const { sale, items, totals } = saleData;
+      const sekolah = db.tb_sekolah[0] || {};
+      const kasir = db.tb_user.find(u => u.id_user === sale.id_user);
+      const pelanggan = db.tb_pelanggan.find(p => p.id_pelanggan === sale.id_pelanggan);
+
+      document.getElementById('rcptSchoolTitle').textContent = sekolah.nama_sekolah || 'SMA NEGERI 1 HARAPAN BANGSA';
+      document.getElementById('rcptSchoolAddress').textContent = sekolah.alamat_sekolah || 'Jl. Pendidikan No. 45';
+      document.getElementById('rcptInvoiceNo').textContent = sale.nomor_faktur;
+      document.getElementById('rcptDate').textContent = sale.tanggal_penjualan;
+      document.getElementById('rcptCashier').textContent = kasir ? kasir.nama_lengkap : 'Kasir';
+      document.getElementById('rcptCustomer').textContent = pelanggan ? pelanggan.nama_pelanggan : 'Umum';
+
+      const itemsContainer = document.getElementById('rcptItemsList');
+      itemsContainer.innerHTML = '';
+
+      items.forEach(it => {
+        const row = document.createElement('div');
+        row.innerHTML = `
+          <div style="font-weight: 700;">${it.nama}</div>
+          <div class="rcpt-row">
+            <span>${it.qty} x ${formatRupiah(it.harga_jual)}</span>
+            <strong>${formatRupiah(it.qty * it.harga_jual)}</strong>
+          </div>
+        `;
+        itemsContainer.appendChild(row);
+      });
+
+      document.getElementById('rcptSubtotal').textContent = formatRupiah(totals.subtotal);
+      const discountRow = document.getElementById('rcptDiscountRow');
+      if (totals.discountNominal > 0) {
+        discountRow.style.display = 'flex';
+        document.getElementById('rcptDiscount').textContent = `-${formatRupiah(totals.discountNominal)}`;
+      } else {
+        discountRow.style.display = 'none';
+      }
+
+      document.getElementById('rcptGrandTotal').textContent = formatRupiah(sale.total_faktur);
+      document.getElementById('rcptPaymentMethod').textContent = sale.cara_bayar.toUpperCase();
+      document.getElementById('rcptTotalPaid').textContent = formatRupiah(sale.total_bayar);
+      document.getElementById('rcptChange').textContent = formatRupiah(sale.kembalian);
+      document.getElementById('rcptTimestamp').textContent = `${sale.tanggal_penjualan} WIB`;
+
+      modal.style.display = 'flex';
+      lucide.createIcons();
+    }
+
+    function closeReceiptModal() {
+      document.getElementById('receiptModal').style.display = 'none';
+    }
+
+    function copyReceiptText() {
+      const content = document.getElementById('thermalReceiptContent').innerText;
+      navigator.clipboard.writeText(content).then(() => {
+        showToast('Teks struk berhasil disalin ke clipboard!', 'success');
+      });
+    }
+  </script>
+</body>
+</html>

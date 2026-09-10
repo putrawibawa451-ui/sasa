@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manajemen Barang - Kasir Pintar</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="theme-teal-ocean">
+
+  <!-- NAVBAR BERSAMA -->
+  <header class="app-navbar">
+    <div class="nav-left">
+      <div class="nav-brand">
+        <div class="nav-logo-icon">
+          <i data-lucide="store"></i>
+        </div>
+        <div class="nav-brand-text">
+          <div class="brand-title">KASIR <span class="brand-highlight">PINTAR</span></div>
+          <div class="brand-school" id="navSchoolName">SMA Negeri 1 Harapan Bangsa</div>
+        </div>
+      </div>
+
+      <nav class="nav-links">
+        <a href="dashboard.html" class="nav-tab" data-tab="dashboard">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="kasir.html" class="nav-tab nav-tab-bright" data-tab="kasir">
+          <i data-lucide="shopping-cart"></i>
+          <span>Kasir POS</span>
+          <span class="nav-badge-bright">Katalog Foto</span>
+        </a>
+        <a href="barang.html" class="nav-tab active" data-tab="inventory">
+          <i data-lucide="package"></i>
+          <span>Manajemen Barang</span>
+        </a>
+        <a href="transaksi.html" class="nav-tab" data-tab="transactions">
+          <i data-lucide="receipt"></i>
+          <span>Riwayat Transaksi</span>
+        </a>
+        <a href="database.html" class="nav-tab" data-tab="erd">
+          <i data-lucide="database"></i>
+          <span>Database ERD</span>
+        </a>
+      </nav>
+    </div>
+
+    <div class="nav-right">
+      <div class="clock-badge">
+        <i data-lucide="clock"></i>
+        <span id="systemClock">00:00:00</span>
+      </div>
+
+      <button class="icon-circle-btn" id="soundToggleBtn" onclick="toggleAudio()" title="Suara Kasir On/Off">
+        <i data-lucide="volume-2" id="soundIcon"></i>
+      </button>
+
+      <div class="user-profile-badge">
+        <div class="user-avatar" id="navUserAvatar">K</div>
+        <div class="user-details">
+          <div class="user-name" id="navUserName">Rina Kasir</div>
+          <span class="user-role-tag" id="navUserRole">Kasir</span>
+        </div>
+      </div>
+
+      <button class="btn-logout" onclick="logout()" title="Keluar dari sistem">
+        <i data-lucide="log-out"></i>
+        <span>Keluar</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- KONTEN MANAJEMEN BARANG -->
+  <main class="view-teal-ocean">
+    <div class="teal-container">
+      <div class="section-page-header">
+        <div>
+          <h2 class="natural-heading">Manajemen Data Barang</h2>
+          <p class="natural-subtext">Kelola katalog master barang, unggah foto produk, atur harga dengan tombol Rupiah, tambah & hapus barang (ERD tb_barang).</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-primary-teal" onclick="openAddProductModal()">
+            <i data-lucide="plus-circle"></i>
+            <span>Tambah Barang Baru</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Filter Card -->
+      <div class="teal-filter-card">
+        <div class="filter-left">
+          <div class="search-box-teal">
+            <i data-lucide="search"></i>
+            <input type="text" id="invSearchInput" placeholder="Cari nama barang, barcode, atau supplier..." oninput="renderInventoryTable()" />
+          </div>
+          <div class="select-box-teal">
+            <select id="invCategoryFilter" onchange="renderInventoryTable()">
+              <option value="all">Semua Kategori</option>
+            </select>
+          </div>
+          <div class="select-box-teal">
+            <select id="invStockFilter" onchange="renderInventoryTable()">
+              <option value="all">Semua Status Stok</option>
+              <option value="low">Stok Menipis (< 10)</option>
+              <option value="empty">Stok Habis (0)</option>
+            </select>
+          </div>
+        </div>
+        <div class="filter-right">
+          <span class="badge-total-items" id="invTotalCountBadge">Total: 0 Barang</span>
+        </div>
+      </div>
+
+      <!-- Inventory Table with Photos -->
+      <div class="teal-table-card">
+        <div class="table-responsive">
+          <table class="ocean-table" id="inventoryTable">
+            <thead>
+              <tr>
+                <th style="width: 70px; text-align: center;">Foto</th>
+                <th style="width: 130px;">Barcode</th>
+                <th>Nama Barang</th>
+                <th>Kategori</th>
+                <th>Satuan</th>
+                <th>Harga Beli</th>
+                <th>Harga Jual</th>
+                <th>Stok</th>
+                <th>Pemasok</th>
+                <th style="width: 130px; text-align: center;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="inventoryTableBody">
+              <!-- Dynamic rows -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL TAMBAH & EDIT BARANG DENGAN FOTO DAN TOMBOL RUPIAH -->
+  <div id="productModal" class="modal-overlay" style="display: none;">
+    <div class="neutral-modal-card">
+      <div class="neutral-modal-header">
+        <div class="modal-header-text">
+          <h3 id="productModalTitle" class="natural-heading-sm">Tambah Barang Baru</h3>
+          <p class="natural-subtext">Lengkapi data master produk, unggah foto barang, dan tentukan harga dengan tombol Rupiah.</p>
+        </div>
+        <button class="modal-close-btn" onclick="closeProductModal()">&times;</button>
+      </div>
+
+      <form id="productForm" class="neutral-modal-body" onsubmit="event.preventDefault(); saveProduct();">
+        <input type="hidden" id="prodEditId" value="" />
+        <input type="hidden" id="prodPhotoData" value="" />
+
+        <!-- FOTO PRODUK UPLOAD & PRESET -->
+        <div class="photo-upload-container">
+          <label class="form-label natural-label">
+            <i data-lucide="image"></i>
+            <span>Foto Produk (Gambar Barang)</span>
+          </label>
+          <div class="photo-uploader-box">
+            <div class="photo-preview-wrapper" id="photoPreviewWrap">
+              <img id="prodPhotoPreview" src="" alt="Pratinjau Foto" style="display: none;" />
+              <div id="photoPlaceholder" class="photo-empty-placeholder">
+                <i data-lucide="image-plus"></i>
+                <span>Belum ada foto</span>
+              </div>
+            </div>
+
+            <div class="photo-actions-column">
+              <input type="file" id="prodPhotoFile" accept="image/*" style="display: none;" onchange="handlePhotoUpload(event)" />
+              <div class="photo-action-buttons">
+                <button type="button" class="btn-photo-pick" onclick="document.getElementById('prodPhotoFile').click()">
+                  <i data-lucide="upload"></i>
+                  <span>Unggah File Foto</span>
+                </button>
+                <button type="button" class="btn-photo-remove" id="btnRemovePhoto" onclick="clearProductPhoto()" style="display: none;">
+                  <i data-lucide="trash-2"></i>
+                  <span>Hapus</span>
+                </button>
+              </div>
+              <small class="photo-hint-text">Mendukung format file JPG, PNG, atau WebP.</small>
+
+              <div class="photo-presets-row">
+                <span class="presets-label">Atau pilih ilustrasi preset cepat:</span>
+                <div class="presets-chips">
+                  <button type="button" class="preset-photo-btn" onclick="selectPresetPhoto('kopi')">☕ Kopi</button>
+                  <button type="button" class="preset-photo-btn" onclick="selectPresetPhoto('beras')">🌾 Beras</button>
+                  <button type="button" class="preset-photo-btn" onclick="selectPresetPhoto('minuman')">🥤 Minuman</button>
+                  <button type="button" class="preset-photo-btn" onclick="selectPresetPhoto('snack')">🍟 Snack</button>
+                  <button type="button" class="preset-photo-btn" onclick="selectPresetPhoto('buku')">📚 Buku</button>
+                  <button type="button" class="preset-photo-btn" onclick="selectPresetPhoto('pulpen')">🖊️ Pulpen</button>
+                  <button type="button" class="preset-photo-btn" onclick="selectPresetPhoto('minyak')">🛢️ Minyak</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row-2 mt-3">
+          <div class="form-group">
+            <label class="form-label natural-label">Barcode / Kode Produk <span class="required">*</span></label>
+            <div class="input-with-action">
+              <input type="text" id="prodBarcode" class="form-control font-mono" placeholder="Contoh: 8991234567890" required />
+              <button type="button" class="btn-input-addon" onclick="generateRandomBarcode()" title="Generate Barcode Otomatis">
+                <i data-lucide="sparkles"></i>
+                <span>Auto</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label natural-label">Nama Barang <span class="required">*</span></label>
+            <input type="text" id="prodName" class="form-control" placeholder="Contoh: Buku Tulis Sinar Dunia 38 Lembar" required />
+          </div>
+        </div>
+
+        <div class="form-row-3">
+          <div class="form-group">
+            <label class="form-label natural-label">Kategori (tb_kategori) <span class="required">*</span></label>
+            <select id="prodCategory" class="form-control" required></select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label natural-label">Satuan <span class="required">*</span></label>
+            <select id="prodUnit" class="form-control" required>
+              <option value="pcs">pcs (Satuan)</option>
+              <option value="pack">pack (Bungkus)</option>
+              <option value="botol">botol</option>
+              <option value="dus">dus / karton</option>
+              <option value="kg">kg (Kilogram)</option>
+              <option value="buku">buku</option>
+              <option value="lusin">lusin</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label natural-label">Supplier (tb_supplier)</label>
+            <select id="prodSupplier" class="form-control"></select>
+          </div>
+        </div>
+
+        <hr class="form-divider" />
+
+        <!-- HARGA JUAL DENGAN TOMBOL PECAHAN RUPIAH -->
+        <div class="rupiah-field-block">
+          <div class="rupiah-header-row">
+            <label class="form-label font-bold natural-label">
+              <i data-lucide="coins"></i>
+              Harga Jual (tb_barang.harga_jual) <span class="required">*</span>
+            </label>
+            <span class="terbilang-text" id="sellingPriceTerbilang">Nol rupiah</span>
+          </div>
+
+          <div class="rupiah-input-container">
+            <span class="rupiah-prefix">Rp</span>
+            <input type="number" id="prodSellingPrice" class="form-control rupiah-large-input font-mono font-bold" placeholder="0" value="0" min="0" oninput="handlePriceInputChange('selling')" required />
+            <button type="button" class="btn-rupiah-clear" onclick="clearRupiahPrice('selling')">Nol-kan</button>
+          </div>
+
+          <div class="rupiah-buttons-panel">
+            <span class="rupiah-panel-label">Tombol Pecahan Tambah (+ Rupiah):</span>
+            <div class="rupiah-buttons-grid">
+              <button type="button" class="btn-rupiah-pill inc" onclick="addRupiahPrice('selling', 500)">+500</button>
+              <button type="button" class="btn-rupiah-pill inc" onclick="addRupiahPrice('selling', 1000)">+1.000</button>
+              <button type="button" class="btn-rupiah-pill inc" onclick="addRupiahPrice('selling', 2000)">+2.000</button>
+              <button type="button" class="btn-rupiah-pill inc" onclick="addRupiahPrice('selling', 5000)">+5.000</button>
+              <button type="button" class="btn-rupiah-pill inc" onclick="addRupiahPrice('selling', 10000)">+10.000</button>
+              <button type="button" class="btn-rupiah-pill inc" onclick="addRupiahPrice('selling', 20000)">+20.000</button>
+              <button type="button" class="btn-rupiah-pill inc" onclick="addRupiahPrice('selling', 50000)">+50.000</button>
+              <button type="button" class="btn-rupiah-pill inc" onclick="addRupiahPrice('selling', 100000)">+100.000</button>
+            </div>
+
+            <span class="rupiah-panel-label mt-2">Tombol Preset Langsung (Set Harga):</span>
+            <div class="rupiah-buttons-grid preset">
+              <button type="button" class="btn-rupiah-pill preset" onclick="setRupiahPrice('selling', 2000)">Rp 2.000</button>
+              <button type="button" class="btn-rupiah-pill preset" onclick="setRupiahPrice('selling', 5000)">Rp 5.000</button>
+              <button type="button" class="btn-rupiah-pill preset" onclick="setRupiahPrice('selling', 10000)">Rp 10.000</button>
+              <button type="button" class="btn-rupiah-pill preset" onclick="setRupiahPrice('selling', 15000)">Rp 15.000</button>
+              <button type="button" class="btn-rupiah-pill preset" onclick="setRupiahPrice('selling', 20000)">Rp 20.000</button>
+              <button type="button" class="btn-rupiah-pill preset" onclick="setRupiahPrice('selling', 25000)">Rp 25.000</button>
+              <button type="button" class="btn-rupiah-pill preset" onclick="setRupiahPrice('selling', 50000)">Rp 50.000</button>
+              <button type="button" class="btn-rupiah-pill preset" onclick="setRupiahPrice('selling', 100000)">Rp 100.000</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- HARGA BELI DENGAN TOMBOL PECAHAN RUPIAH -->
+        <div class="rupiah-field-block mt-3">
+          <div class="rupiah-header-row">
+            <label class="form-label font-bold natural-label">
+              <i data-lucide="tag"></i>
+              Harga Beli / Modal (tb_barang.harga_beli) <span class="required">*</span>
+            </label>
+            <span class="terbilang-text" id="buyingPriceTerbilang">Nol rupiah</span>
+          </div>
+
+          <div class="rupiah-input-container">
+            <span class="rupiah-prefix">Rp</span>
+            <input type="number" id="prodBuyingPrice" class="form-control rupiah-large-input font-mono font-bold" placeholder="0" value="0" min="0" oninput="handlePriceInputChange('buying')" required />
+            <button type="button" class="btn-rupiah-clear" onclick="clearRupiahPrice('buying')">Nol-kan</button>
+          </div>
+
+          <div class="rupiah-buttons-panel">
+            <div class="rupiah-buttons-grid">
+              <button type="button" class="btn-rupiah-pill inc" onclick="addRupiahPrice('buying', 1000)">+1.000</button>
+              <button type="button" class="btn-rupiah-pill inc" onclick="addRupiahPrice('buying', 5000)">+5.000</button>
+              <button type="button" class="btn-rupiah-pill inc" onclick="addRupiahPrice('buying', 10000)">+10.000</button>
+              <button type="button" class="btn-rupiah-pill inc" onclick="addRupiahPrice('buying', 20000)">+20.000</button>
+              <button type="button" class="btn-rupiah-pill inc" onclick="addRupiahPrice('buying', 50000)">+50.000</button>
+              <button type="button" class="btn-rupiah-pill preset" onclick="setRupiahPrice('buying', 8000)">Rp 8.000</button>
+              <button type="button" class="btn-rupiah-pill preset" onclick="setRupiahPrice('buying', 12000)">Rp 12.000</button>
+              <button type="button" class="btn-rupiah-pill preset" onclick="setRupiahPrice('buying', 20000)">Rp 20.000</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row-2 mt-3">
+          <div class="form-group">
+            <label class="form-label natural-label">Jumlah Stok (tb_barang.stok) <span class="required">*</span></label>
+            <input type="number" id="prodStock" class="form-control font-mono font-bold" min="0" value="50" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label natural-label">Status Produk (is_active)</label>
+            <select id="prodIsActive" class="form-control">
+              <option value="1">Aktif (Dapat Ditransaksikan)</option>
+              <option value="0">Non-Aktif (Disembunyikan)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="neutral-modal-footer">
+          <button type="button" class="btn-neutral-outline" onclick="closeProductModal()">Batal</button>
+          <button type="submit" class="btn-primary-teal">
+            <i data-lucide="check"></i>
+            <span id="btnSaveProductText">Simpan Produk</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL HAPUS BARANG (DENGAN PRATINJAU FOTO) -->
+  <div id="deleteModal" class="modal-overlay" style="display: none;">
+    <div class="delete-modal-card">
+      <div class="delete-icon-ring">
+        <i data-lucide="trash-2"></i>
+      </div>
+      <h3 class="delete-modal-title natural-heading-sm">Hapus Barang Dari Database?</h3>
+      <p class="delete-modal-desc natural-subtext">
+        Apakah Anda yakin ingin menghapus barang <strong id="deleteTargetName">-</strong>? Data akan ditandai terhapus (soft-delete <code>is_delete = 1</code>) sesuai tabel <code>tb_barang</code>.
+      </p>
+
+      <div class="delete-product-preview">
+        <div class="delete-preview-thumb-row">
+          <div class="delete-thumb-frame" id="deleteTargetPhotoWrap">
+            <img id="deleteTargetPhoto" src="" alt="Thumb" style="display: none;" />
+            <i data-lucide="package" id="deleteTargetIcon"></i>
+          </div>
+          <div class="delete-meta-info">
+            <div class="preview-row"><span>Barcode:</span><strong id="deleteTargetBarcode" class="font-mono">-</strong></div>
+            <div class="preview-row"><span>Harga Jual:</span><strong id="deleteTargetPrice" class="font-mono text-emerald">-</strong></div>
+            <div class="preview-row"><span>Sisa Stok:</span><strong id="deleteTargetStock" class="font-mono">-</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="delete-modal-actions">
+        <button type="button" class="btn-neutral-outline" onclick="closeDeleteModal()">Batalkan</button>
+        <button type="button" class="btn-confirm-delete" onclick="confirmDeleteProduct()">
+          <i data-lucide="trash-2"></i>
+          <span>Ya, Hapus Barang</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="shared.js"></script>
+  <script>
+    let deleteTargetId = null;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initSharedNavbar('inventory');
+      renderInventoryTable();
+    });
+
+    function renderInventoryTable() {
+      const tableBody = document.getElementById('inventoryTableBody');
+      const catFilter = document.getElementById('invCategoryFilter');
+      const stockFilter = document.getElementById('invStockFilter');
+      const searchInput = document.getElementById('invSearchInput');
+      const totalCountBadge = document.getElementById('invTotalCountBadge');
+
+      if (!tableBody) return;
+
+      if (catFilter && catFilter.options.length <= 1) {
+        db.tb_kategori.forEach(k => {
+          const opt = document.createElement('option');
+          opt.value = k.id_kategori;
+          opt.textContent = k.nama;
+          catFilter.appendChild(opt);
+        });
+      }
+
+      const keyword = searchInput ? searchInput.value.toLowerCase().trim() : '';
+      const selectedCat = catFilter ? catFilter.value : 'all';
+      const selectedStock = stockFilter ? stockFilter.value : 'all';
+
+      const activeProducts = db.tb_barang.filter(b => b.is_delete === 0);
+
+      const filtered = activeProducts.filter(p => {
+        const matchCat = selectedCat === 'all' || String(p.id_kategori) === selectedCat;
+        const matchSearch = !keyword || p.nama.toLowerCase().includes(keyword) || p.barcode.includes(keyword);
+
+        let matchStock = true;
+        if (selectedStock === 'low') matchStock = p.stok > 0 && p.stok < 10;
+        else if (selectedStock === 'empty') matchStock = p.stok === 0;
+
+        return matchCat && matchSearch && matchStock;
+      });
+
+      if (totalCountBadge) totalCountBadge.textContent = `Total: ${filtered.length} Barang`;
+
+      tableBody.innerHTML = '';
+      if (filtered.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="10" style="text-align: center; color: #64748b; padding: 30px;">Tidak ada barang yang cocok dengan kriteria filter.</td></tr>`;
+        return;
+      }
+
+      filtered.forEach(p => {
+        const category = db.tb_kategori.find(k => k.id_kategori === p.id_kategori);
+        const supplier = db.tb_supplier.find(s => s.id_supplier === p.id_supplier);
+        const catName = category ? category.nama : '-';
+        const supplierName = supplier ? supplier.nama : '-';
+
+        let stockBadge = `<span class="prod-floating-stock" style="position:static; background:#ccfbf1; color:#0f766e;">${p.stok}</span>`;
+        if (p.stok === 0) stockBadge = `<span class="prod-floating-stock" style="position:static; background:#fee2e2; color:#b91c1c;">Habis</span>`;
+        else if (p.stok < 10) stockBadge = `<span class="prod-floating-stock" style="position:static; background:#fef3c7; color:#b45309;">${p.stok} (Menipis)</span>`;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="text-align: center;">
+            ${p.foto 
+              ? `<img src="${p.foto}" class="inv-photo-thumb" alt="${p.nama}">` 
+              : `<div class="inv-photo-thumb-fallback"><i data-lucide="package"></i></div>`
+            }
+          </td>
+          <td><span class="font-mono font-bold" style="color: #0284c7;">${p.barcode}</span></td>
+          <td><strong style="color: #0f172a;">${p.nama}</strong></td>
+          <td><span class="bank-chip" style="display:inline-block; font-size:0.75rem; padding: 2px 8px;">${catName}</span></td>
+          <td>${p.satuan}</td>
+          <td class="font-mono text-dark">${formatRupiah(p.harga_beli)}</td>
+          <td class="font-mono font-bold" style="color: #0f766e;">${formatRupiah(p.harga_jual)}</td>
+          <td>${stockBadge}</td>
+          <td><small style="color: #64748b;">${supplierName}</small></td>
+          <td style="text-align: center;">
+            <button class="btn-teal-outline" style="padding: 5px 9px; font-size: 0.78rem; margin-right: 4px;" onclick="openEditProductModal(${p.id_barang})" title="Edit Barang">
+              <i data-lucide="edit-3"></i>
+            </button>
+            <button class="btn-remove-item" style="padding: 5px 9px; font-size: 0.78rem;" onclick="openDeleteProductModal(${p.id_barang})" title="Hapus Barang">
+              <i data-lucide="trash-2"></i>
+            </button>
+          </td>
+        `;
+        tableBody.appendChild(tr);
+      });
+
+      lucide.createIcons();
+    }
+
+    function openAddProductModal() {
+      document.getElementById('productModalTitle').textContent = 'Tambah Barang Baru';
+      document.getElementById('btnSaveProductText').textContent = 'Simpan Produk';
+      document.getElementById('prodEditId').value = '';
+
+      populateProductSelectOptions();
+
+      document.getElementById('prodBarcode').value = '';
+      document.getElementById('prodName').value = '';
+      document.getElementById('prodUnit').value = 'pcs';
+      document.getElementById('prodSellingPrice').value = 0;
+      document.getElementById('prodBuyingPrice').value = 0;
+      document.getElementById('prodStock').value = 50;
+      document.getElementById('prodIsActive').value = '1';
+
+      clearProductPhoto();
+      handlePriceInputChange('selling');
+      handlePriceInputChange('buying');
+      generateRandomBarcode();
+
+      document.getElementById('productModal').style.display = 'flex';
+      playSound('click');
+      lucide.createIcons();
+    }
+
+    function openEditProductModal(productId) {
+      const prod = db.tb_barang.find(b => b.id_barang === productId);
+      if (!prod) return;
+
+      document.getElementById('productModalTitle').textContent = 'Ubah Data Barang & Harga';
+      document.getElementById('btnSaveProductText').textContent = 'Perbarui Produk';
+      document.getElementById('prodEditId').value = prod.id_barang;
+
+      populateProductSelectOptions();
+
+      document.getElementById('prodBarcode').value = prod.barcode;
+      document.getElementById('prodName').value = prod.nama;
+      document.getElementById('prodCategory').value = prod.id_kategori;
+      document.getElementById('prodUnit').value = prod.satuan;
+      document.getElementById('prodSupplier').value = prod.id_supplier || '';
+      document.getElementById('prodSellingPrice').value = prod.harga_jual;
+      document.getElementById('prodBuyingPrice').value = prod.harga_beli;
+      document.getElementById('prodStock').value = prod.stok;
+      document.getElementById('prodIsActive').value = prod.is_active;
+
+      setPhotoPreview(prod.foto || '');
+      handlePriceInputChange('selling');
+      handlePriceInputChange('buying');
+
+      document.getElementById('productModal').style.display = 'flex';
+      playSound('click');
+      lucide.createIcons();
+    }
+
+    function closeProductModal() {
+      document.getElementById('productModal').style.display = 'none';
+    }
+
+    function populateProductSelectOptions() {
+      const catSelect = document.getElementById('prodCategory');
+      const supSelect = document.getElementById('prodSupplier');
+
+      if (catSelect) {
+        catSelect.innerHTML = '';
+        db.tb_kategori.forEach(k => {
+          const opt = document.createElement('option');
+          opt.value = k.id_kategori;
+          opt.textContent = k.nama;
+          catSelect.appendChild(opt);
+        });
+      }
+
+      if (supSelect) {
+        supSelect.innerHTML = '';
+        db.tb_supplier.filter(s => s.is_delete === 0).forEach(s => {
+          const opt = document.createElement('option');
+          opt.value = s.id_supplier;
+          opt.textContent = s.nama;
+          supSelect.appendChild(opt);
+        });
+      }
+    }
+
+    function generateRandomBarcode() {
+      const prefix = '899100';
+      const rand = Math.floor(100000 + Math.random() * 900000);
+      document.getElementById('prodBarcode').value = `${prefix}${rand}`;
+      playSound('click');
+    }
+
+    function handlePhotoUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith('image/')) {
+        playSound('error');
+        showToast('File yang dipilih harus berupa gambar (JPG, PNG, WebP)!', 'error');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const dataUrl = e.target.result;
+        setPhotoPreview(dataUrl);
+        playSound('click');
+        showToast('Foto produk berhasil dimuat!', 'success');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function selectPresetPhoto(type) {
+      const data = PRESET_PHOTOS[type];
+      if (data) {
+        setPhotoPreview(data);
+        playSound('click');
+        showToast(`Foto ilustrasi "${type}" dipilih!`, 'info');
+      }
+    }
+
+    function setPhotoPreview(url) {
+      const previewImg = document.getElementById('prodPhotoPreview');
+      const placeholder = document.getElementById('photoPlaceholder');
+      const removeBtn = document.getElementById('btnRemovePhoto');
+      const hiddenInput = document.getElementById('prodPhotoData');
+
+      if (url) {
+        previewImg.src = url;
+        previewImg.style.display = 'block';
+        if (placeholder) placeholder.style.display = 'none';
+        if (removeBtn) removeBtn.style.display = 'inline-flex';
+        if (hiddenInput) hiddenInput.value = url;
+      } else {
+        previewImg.src = '';
+        previewImg.style.display = 'none';
+        if (placeholder) placeholder.style.display = 'flex';
+        if (removeBtn) removeBtn.style.display = 'none';
+        if (hiddenInput) hiddenInput.value = '';
+      }
+    }
+
+    function clearProductPhoto() {
+      setPhotoPreview('');
+      const fileInput = document.getElementById('prodPhotoFile');
+      if (fileInput) fileInput.value = '';
+      playSound('click');
+    }
+
+    function addRupiahPrice(targetField, amount) {
+      const inputId = targetField === 'selling' ? 'prodSellingPrice' : 'prodBuyingPrice';
+      const input = document.getElementById(inputId);
+      if (!input) return;
+
+      input.value = (Number(input.value) || 0) + amount;
+      handlePriceInputChange(targetField);
+      playSound('click');
+    }
+
+    function setRupiahPrice(targetField, amount) {
+      const inputId = targetField === 'selling' ? 'prodSellingPrice' : 'prodBuyingPrice';
+      const input = document.getElementById(inputId);
+      if (!input) return;
+
+      input.value = amount;
+      handlePriceInputChange(targetField);
+      playSound('click');
+    }
+
+    function clearRupiahPrice(targetField) {
+      const inputId = targetField === 'selling' ? 'prodSellingPrice' : 'prodBuyingPrice';
+      const input = document.getElementById(inputId);
+      if (!input) return;
+
+      input.value = 0;
+      handlePriceInputChange(targetField);
+      playSound('click');
+    }
+
+    function handlePriceInputChange(targetField) {
+      const inputId = targetField === 'selling' ? 'prodSellingPrice' : 'prodBuyingPrice';
+      const terbilangId = targetField === 'selling' ? 'sellingPriceTerbilang' : 'buyingPriceTerbilang';
+      const input = document.getElementById(inputId);
+      const terbilangElem = document.getElementById(terbilangId);
+      if (!input || !terbilangElem) return;
+
+      const val = Number(input.value) || 0;
+      terbilangElem.textContent = numberToWordsIndonesian(val);
+    }
+
+    function saveProduct() {
+      const editId = document.getElementById('prodEditId').value;
+      const barcode = document.getElementById('prodBarcode').value.trim();
+      const nama = document.getElementById('prodName').value.trim();
+      const id_kategori = Number(document.getElementById('prodCategory').value);
+      const satuan = document.getElementById('prodUnit').value;
+      const id_supplier = Number(document.getElementById('prodSupplier').value);
+      const harga_jual = Number(document.getElementById('prodSellingPrice').value) || 0;
+      const harga_beli = Number(document.getElementById('prodBuyingPrice').value) || 0;
+      const stok = Number(document.getElementById('prodStock').value) || 0;
+      const is_active = Number(document.getElementById('prodIsActive').value);
+      const foto = document.getElementById('prodPhotoData').value || '';
+
+      if (!barcode || !nama) {
+        showToast('Barcode dan nama barang harus diisi!', 'error');
+        return;
+      }
+
+      const duplicate = db.tb_barang.find(b => b.barcode === barcode && b.is_delete === 0 && (!editId || b.id_barang !== Number(editId)));
+      if (duplicate) {
+        showToast(`Barcode ${barcode} sudah digunakan oleh produk "${duplicate.nama}"!`, 'error');
+        return;
+      }
+
+      const category = db.tb_kategori.find(k => k.id_kategori === id_kategori);
+      const id_kelompok_kategori = category ? category.id_kelompok : 1;
+
+      if (editId) {
+        const prod = db.tb_barang.find(b => b.id_barang === Number(editId));
+        if (prod) {
+          prod.barcode = barcode;
+          prod.nama = nama;
+          prod.id_kategori = id_kategori;
+          prod.id_kelompok_kategori = id_kelompok_kategori;
+          prod.id_supplier = id_supplier;
+          prod.satuan = satuan;
+          prod.harga_jual = harga_jual;
+          prod.harga_beli = harga_beli;
+          prod.stok = stok;
+          prod.is_active = is_active;
+          prod.foto = foto;
+        }
+        showToast(`Produk "${nama}" berhasil diperbarui!`, 'success');
+      } else {
+        const newId = db.tb_barang.length > 0 ? Math.max(...db.tb_barang.map(b => b.id_barang)) + 1 : 1;
+        const newProduct = {
+          id_barang: newId,
+          id_sekolah: 1,
+          barcode,
+          nama,
+          id_kategori,
+          id_kelompok_kategori,
+          id_supplier,
+          satuan,
+          harga_beli,
+          harga_jual,
+          stok,
+          is_active,
+          is_delete: 0,
+          foto
+        };
+        db.tb_barang.push(newProduct);
+        showToast(`Produk "${nama}" berhasil ditambahkan ke database!`, 'success');
+      }
+
+      saveDatabase();
+      closeProductModal();
+      renderInventoryTable();
+      playSound('success');
+    }
+
+    function openDeleteProductModal(productId) {
+      const prod = db.tb_barang.find(b => b.id_barang === productId);
+      if (!prod) return;
+
+      deleteTargetId = productId;
+      document.getElementById('deleteTargetName').textContent = prod.nama;
+      document.getElementById('deleteTargetBarcode').textContent = prod.barcode;
+      document.getElementById('deleteTargetPrice').textContent = formatRupiah(prod.harga_jual);
+      document.getElementById('deleteTargetStock').textContent = `${prod.stok} ${prod.satuan}`;
+
+      const photoImg = document.getElementById('deleteTargetPhoto');
+      const photoIcon = document.getElementById('deleteTargetIcon');
+      if (prod.foto) {
+        photoImg.src = prod.foto;
+        photoImg.style.display = 'block';
+        if (photoIcon) photoIcon.style.display = 'none';
+      } else {
+        photoImg.src = '';
+        photoImg.style.display = 'none';
+        if (photoIcon) photoIcon.style.display = 'block';
+      }
+
+      document.getElementById('deleteModal').style.display = 'flex';
+      playSound('click');
+      lucide.createIcons();
+    }
+
+    function closeDeleteModal() {
+      document.getElementById('deleteModal').style.display = 'none';
+      deleteTargetId = null;
+    }
+
+    function confirmDeleteProduct() {
+      if (!deleteTargetId) return;
+
+      const prod = db.tb_barang.find(b => b.id_barang === deleteTargetId);
+      if (prod) {
+        prod.is_delete = 1;
+        saveDatabase();
+        showToast(`Barang "${prod.nama}" telah berhasil dihapus.`, 'info');
+        playSound('beep');
+      }
+
+      closeDeleteModal();
+      renderInventoryTable();
+    }
+  </script>
+</body>
+</html>

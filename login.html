@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Masuk - Kasir Pintar POS & Inventaris</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="theme-teal-ocean">
+
+  <!-- LOGIN SCREEN (DOMINAN WARNA MERAH & BIRU) -->
+  <div id="loginScreen" class="screen-wrapper login-view active">
+    <div class="login-bg-shapes">
+      <div class="shape-red"></div>
+      <div class="shape-blue"></div>
+      <div class="shape-glow"></div>
+    </div>
+
+    <div class="login-container">
+      <!-- Left side: Hero Branding -->
+      <div class="login-brand-side">
+        <div class="brand-badge-pill">
+          <i data-lucide="shield-check"></i>
+          <span>ERD Integrated POS v2.0</span>
+        </div>
+        <h1 class="brand-hero-title">
+          KASIR <span class="text-blue">PINTAR</span> & <span class="text-red">INVENTARIS</span>
+        </h1>
+        <p class="brand-hero-desc">
+          Sistem Point of Sale & Kasir Sekolah terintegrasi penuh dengan struktur database relasional (ERD). Cepat, akurat, dan mendukung multi-metode pembayaran modern serta foto barang.
+        </p>
+
+        <div class="school-info-card">
+          <div class="school-icon">
+            <i data-lucide="graduation-cap"></i>
+          </div>
+          <div class="school-text">
+            <span class="school-label">Database Sekolah Aktif</span>
+            <strong id="loginSchoolName">SMA Negeri 1 Harapan Bangsa</strong>
+            <span class="school-code" id="loginSchoolCode">KODE: SCH-001</span>
+          </div>
+        </div>
+
+        <div class="erd-features-list">
+          <div class="feat-item"><i data-lucide="check-circle-2"></i> Sistem Halaman Multi-Modul Terpisah</div>
+          <div class="feat-item"><i data-lucide="check-circle-2"></i> Foto Produk Beresolusi Jelas & Preview</div>
+          <div class="feat-item"><i data-lucide="check-circle-2"></i> Tunai, QRIS Dinamis, Debit & Kredit</div>
+          <div class="feat-item"><i data-lucide="check-circle-2"></i> Tombol Pecahan Rupiah Cepat Otomatis</div>
+        </div>
+      </div>
+
+      <!-- Right side: Red-Blue Login Card -->
+      <div class="login-card-side">
+        <div class="login-card-header">
+          <div class="login-avatar-ring">
+            <i data-lucide="user-check"></i>
+          </div>
+          <h2>Masuk ke Sistem</h2>
+          <p>Pilih peran pengguna atau gunakan akun cepat</p>
+        </div>
+
+        <form id="loginForm" class="login-form" onsubmit="event.preventDefault(); handleLogin();">
+          <div class="form-group">
+            <label class="form-label">Pilih Peran (Role)</label>
+            <div class="role-selector-grid">
+              <button type="button" class="role-btn active" data-role="kasir" onclick="selectRole('kasir')">
+                <i data-lucide="shopping-bag"></i>
+                <span>Kasir</span>
+              </button>
+              <button type="button" class="role-btn" data-role="admin" onclick="selectRole('admin')">
+                <i data-lucide="settings"></i>
+                <span>Admin</span>
+              </button>
+              <button type="button" class="role-btn" data-role="super admin" onclick="selectRole('super admin')">
+                <i data-lucide="shield"></i>
+                <span>Super Admin</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="usernameInput" class="form-label">Username</label>
+            <div class="input-with-icon">
+              <i data-lucide="user" class="input-icon"></i>
+              <input type="text" id="usernameInput" class="form-control" placeholder="Masukkan username..." value="kasir" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="passwordInput" class="form-label">Password</label>
+            <div class="input-with-icon">
+              <i data-lucide="lock" class="input-icon"></i>
+              <input type="password" id="passwordInput" class="form-control" placeholder="Masukkan password..." value="123" required />
+              <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility()">
+                <i data-lucide="eye" id="pwdEyeIcon"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Test Credentials -->
+          <div class="quick-credentials-box">
+            <span class="quick-title">Akun Cepat (Klik untuk isi):</span>
+            <div class="quick-btn-row">
+              <button type="button" class="quick-acc-btn" onclick="fillDemoAccount('kasir', '123', 'kasir')">
+                <span class="role-dot dot-kasir"></span> Kasir
+              </button>
+              <button type="button" class="quick-acc-btn" onclick="fillDemoAccount('admin', '123', 'admin')">
+                <span class="role-dot dot-admin"></span> Admin
+              </button>
+              <button type="button" class="quick-acc-btn" onclick="fillDemoAccount('superadmin', '123', 'super admin')">
+                <span class="role-dot dot-super"></span> Super Admin
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-login-submit">
+            <span>Masuk Sekarang</span>
+            <i data-lucide="arrow-right"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="shared.js"></script>
+  <script>
+    let selectedRole = 'kasir';
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadDatabase();
+      const school = db.tb_sekolah[0] || {};
+      document.getElementById('loginSchoolName').textContent = school.nama_sekolah || 'SMA Negeri 1 Harapan Bangsa';
+      document.getElementById('loginSchoolCode').textContent = `KODE: ${school.kode_sekolah || 'SCH-001'}`;
+      if (window.lucide) lucide.createIcons();
+    });
+
+    function selectRole(role) {
+      selectedRole = role;
+      document.querySelectorAll('.role-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-role') === role);
+      });
+      playSound('click');
+    }
+
+    function fillDemoAccount(username, password, role) {
+      document.getElementById('usernameInput').value = username;
+      document.getElementById('passwordInput').value = password;
+      selectRole(role);
+      playSound('click');
+    }
+
+    function togglePasswordVisibility() {
+      const pwdInput = document.getElementById('passwordInput');
+      const eyeIcon = document.getElementById('pwdEyeIcon');
+      if (pwdInput.type === 'password') {
+        pwdInput.type = 'text';
+        eyeIcon.setAttribute('data-lucide', 'eye-off');
+      } else {
+        pwdInput.type = 'password';
+        eyeIcon.setAttribute('data-lucide', 'eye');
+      }
+      lucide.createIcons();
+    }
+
+    function handleLogin() {
+      const username = document.getElementById('usernameInput').value.trim();
+      const password = document.getElementById('passwordInput').value.trim();
+
+      const user = db.tb_user.find(u => u.username === username && u.password === password && u.is_active === 1);
+      if (!user) {
+        playSound('error');
+        showToast('Username atau password tidak cocok!', 'error');
+        return;
+      }
+
+      const roleObj = db.roles.find(r => r.id_role === user.id_role);
+      user.role_name = roleObj ? roleObj.nama_role : selectedRole;
+
+      localStorage.setItem('kasir_pintar_current_user', JSON.stringify(user));
+      playSound('success');
+      showToast(`Login berhasil! Mengalihkan ke aplikasi...`, 'success');
+
+      setTimeout(() => {
+        if (user.role_name === 'kasir') {
+          window.location.href = 'kasir.html';
+        } else {
+          window.location.href = 'dashboard.html';
+        }
+      }, 600);
+    }
+  </script>
+</body>
+</html>

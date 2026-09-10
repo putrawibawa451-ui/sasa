@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kasir Pintar - Gateway & Portal Modul POS</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .portal-container {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2.5rem 1.5rem;
+      background: radial-gradient(circle at top right, rgba(13, 148, 136, 0.18), transparent 50%),
+                  radial-gradient(circle at bottom left, rgba(2, 132, 199, 0.15), transparent 50%),
+                  #f0fdfa;
+    }
+    .portal-card {
+      background: #ffffff;
+      border: 1px solid #ccfbf1;
+      border-radius: 1.5rem;
+      box-shadow: 0 20px 40px -15px rgba(15, 118, 110, 0.12), 0 0 1px rgba(0,0,0,0.05);
+      max-width: 820px;
+      width: 100%;
+      padding: 2.5rem;
+      text-align: center;
+    }
+    .portal-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 1rem;
+      background: #ecfeff;
+      border: 1px solid #a5f3fc;
+      border-radius: 9999px;
+      color: #0e7490;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+    .portal-title {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.75rem;
+    }
+    .portal-subtitle {
+      color: #475569;
+      font-size: 1rem;
+      max-width: 580px;
+      margin: 0 auto 2rem auto;
+      line-height: 1.6;
+    }
+    .portal-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      text-align: left;
+      margin-bottom: 2rem;
+    }
+    .portal-item {
+      display: flex;
+      flex-direction: column;
+      padding: 1.25rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 1rem;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .portal-item:hover {
+      transform: translateY(-3px);
+      border-color: #0d9488;
+      box-shadow: 0 10px 20px -5px rgba(13, 148, 136, 0.15);
+      background: #ffffff;
+    }
+    .portal-item-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+      font-size: 1.25rem;
+    }
+    .icon-login { background: #fee2e2; color: #dc2626; }
+    .icon-dash { background: #e0f2fe; color: #0284c7; }
+    .icon-pos { background: #ccfbf1; color: #0f766e; }
+    .icon-barang { background: #fef3c7; color: #d97706; }
+    .icon-trans { background: #f3e8ff; color: #7e22ce; }
+    .icon-erd { background: #e2e8f0; color: #334155; }
+    
+    .portal-item-title {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: #0f172a;
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .portal-item-desc {
+      font-size: 0.85rem;
+      color: #64748b;
+      line-height: 1.5;
+    }
+    .portal-footer {
+      padding-top: 1.5rem;
+      border-top: 1px solid #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-size: 0.85rem;
+      color: #64748b;
+    }
+    .redirect-banner {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #15803d;
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.75rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+  </style>
+</head>
+<body class="theme-teal-ocean">
+
+  <div class="portal-container">
+    <div class="portal-card">
+      <div class="portal-badge">
+        <i data-lucide="layers"></i>
+        <span>Sistem Modular Multi-Halaman Terpisah</span>
+      </div>
+
+      <h1 class="portal-title">KASIR <span class="text-blue">PINTAR</span> & <span class="text-teal">INVENTARIS</span></h1>
+      <p class="portal-subtitle">
+        Setiap fitur kasir dan manajemen telah dipisahkan menjadi halaman independen namun tetap terhubung secara otomatis ke basis data relasional ERD (localStorage).
+      </p>
+
+      <div id="redirectStatus" class="redirect-banner">
+        <i data-lucide="loader-2" class="spin"></i>
+        <span id="redirectText">Memeriksa status sesi pengguna...</span>
+      </div>
+
+      <div class="portal-grid">
+        <!-- 1. Login -->
+        <a href="login.html" class="portal-item">
+          <div class="portal-item-icon icon-login">
+            <i data-lucide="log-in"></i>
+          </div>
+          <div class="portal-item-title">
+            <span>1. Login Masuk</span>
+            <i data-lucide="arrow-right" style="width:16px;height:16px;"></i>
+          </div>
+          <div class="portal-item-desc">
+            Halaman autentikasi dominan <strong>Merah & Biru</strong> dengan tombol akun instan (Kasir, Admin, Super Admin).
+          </div>
+        </a>
+
+        <!-- 2. Kasir POS -->
+        <a href="kasir.html" class="portal-item">
+          <div class="portal-item-icon icon-pos">
+            <i data-lucide="shopping-cart"></i>
+          </div>
+          <div class="portal-item-title">
+            <span>2. Kasir POS</span>
+            <i data-lucide="arrow-right" style="width:16px;height:16px;"></i>
+          </div>
+          <div class="portal-item-desc">
+            Mesin kasir cerah dengan foto barang, barcode scanner, keranjang, 4 metode bayar (Tunai, QRIS, Debit, Kredit) & cetak struk thermal.
+          </div>
+        </a>
+
+        <!-- 3. Kelola Barang -->
+        <a href="barang.html" class="portal-item">
+          <div class="portal-item-icon icon-barang">
+            <i data-lucide="package"></i>
+          </div>
+          <div class="portal-item-title">
+            <span>3. Kelola Barang</span>
+            <i data-lucide="arrow-right" style="width:16px;height:16px;"></i>
+          </div>
+          <div class="portal-item-desc">
+            Katalog inventaris dengan upload foto produk, preset ilustrasi, tombol nominal Rupiah cepat, dan soft delete.
+          </div>
+        </a>
+
+        <!-- 4. Dashboard -->
+        <a href="dashboard.html" class="portal-item">
+          <div class="portal-item-icon icon-dash">
+            <i data-lucide="layout-dashboard"></i>
+          </div>
+          <div class="portal-item-title">
+            <span>4. Dashboard</span>
+            <i data-lucide="arrow-right" style="width:16px;height:16px;"></i>
+          </div>
+          <div class="portal-item-desc">
+            Ringkasan omset harian, jumlah transaksi, total produk aktif, serta peringatan stok menipis secara realtime.
+          </div>
+        </a>
+
+        <!-- 5. Riwayat Transaksi -->
+        <a href="transaksi.html" class="portal-item">
+          <div class="portal-item-icon icon-trans">
+            <i data-lucide="history"></i>
+          </div>
+          <div class="portal-item-title">
+            <span>5. Transaksi</span>
+            <i data-lucide="arrow-right" style="width:16px;height:16px;"></i>
+          </div>
+          <div class="portal-item-desc">
+            Daftar seluruh nota penjualan, rincian pembayaran, filter tanggal/metode, dan fitur cetak ulang nota thermal.
+          </div>
+        </a>
+
+        <!-- 6. Basis Data ERD -->
+        <a href="database.html" class="portal-item">
+          <div class="portal-item-icon icon-erd">
+            <i data-lucide="database"></i>
+          </div>
+          <div class="portal-item-title">
+            <span>6. Database ERD</span>
+            <i data-lucide="arrow-right" style="width:16px;height:16px;"></i>
+          </div>
+          <div class="portal-item-desc">
+            Penampil struktur 10 tabel relasional sesuai skema ERD lengkap, ekspor JSON, dan tombol reset database awal.
+          </div>
+        </a>
+      </div>
+
+      <div class="portal-footer">
+        <div>
+          <strong>Status Database:</strong> <span id="dbStatus">Terhubung ke localStorage</span>
+        </div>
+        <div>
+          <span>Desain Natural Typography &bull; Teal-Ocean Tone</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="shared.js"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      loadDatabase();
+      if (window.lucide) lucide.createIcons();
+
+      const user = getCurrentUser();
+      const redirectText = document.getElementById('redirectText');
+
+      if (user) {
+        redirectText.innerHTML = `Sesi aktif ditemukan sebagai <strong>${user.nama_lengkap}</strong> (${user.role_name || 'pengguna'}). Mengalihkan...`;
+        setTimeout(() => {
+          if (user.role_name === 'kasir') {
+            window.location.href = 'kasir.html';
+          } else {
+            window.location.href = 'dashboard.html';
+          }
+        }, 1200);
+      } else {
+        redirectText.innerHTML = `Belum ada sesi login. Mengalihkan ke <a href="login.html" style="color:#15803d; font-weight:bold; text-decoration:underline;">Halaman Login</a>...`;
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 1400);
+      }
+    });
+  </script>
+</body>
+</html>

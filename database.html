@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Database ERD - Kasir Pintar</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="theme-teal-ocean">
+
+  <!-- NAVBAR BERSAMA -->
+  <header class="app-navbar">
+    <div class="nav-left">
+      <div class="nav-brand">
+        <div class="nav-logo-icon">
+          <i data-lucide="store"></i>
+        </div>
+        <div class="nav-brand-text">
+          <div class="brand-title">KASIR <span class="brand-highlight">PINTAR</span></div>
+          <div class="brand-school" id="navSchoolName">SMA Negeri 1 Harapan Bangsa</div>
+        </div>
+      </div>
+
+      <nav class="nav-links">
+        <a href="dashboard.html" class="nav-tab" data-tab="dashboard">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="kasir.html" class="nav-tab nav-tab-bright" data-tab="kasir">
+          <i data-lucide="shopping-cart"></i>
+          <span>Kasir POS</span>
+          <span class="nav-badge-bright">Katalog Foto</span>
+        </a>
+        <a href="barang.html" class="nav-tab" data-tab="inventory">
+          <i data-lucide="package"></i>
+          <span>Manajemen Barang</span>
+        </a>
+        <a href="transaksi.html" class="nav-tab" data-tab="transactions">
+          <i data-lucide="receipt"></i>
+          <span>Riwayat Transaksi</span>
+        </a>
+        <a href="database.html" class="nav-tab active" data-tab="erd">
+          <i data-lucide="database"></i>
+          <span>Database ERD</span>
+        </a>
+      </nav>
+    </div>
+
+    <div class="nav-right">
+      <div class="clock-badge">
+        <i data-lucide="clock"></i>
+        <span id="systemClock">00:00:00</span>
+      </div>
+
+      <button class="icon-circle-btn" id="soundToggleBtn" onclick="toggleAudio()" title="Suara Kasir On/Off">
+        <i data-lucide="volume-2" id="soundIcon"></i>
+      </button>
+
+      <div class="user-profile-badge">
+        <div class="user-avatar" id="navUserAvatar">K</div>
+        <div class="user-details">
+          <div class="user-name" id="navUserName">Rina Kasir</div>
+          <span class="user-role-tag" id="navUserRole">Kasir</span>
+        </div>
+      </div>
+
+      <button class="btn-logout" onclick="logout()" title="Keluar dari sistem">
+        <i data-lucide="log-out"></i>
+        <span>Keluar</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- KONTEN DATABASE ERD -->
+  <main class="view-teal-ocean">
+    <div class="teal-container">
+      <div class="section-page-header">
+        <div>
+          <h2 class="natural-heading">Inspektor Database Relasional (ERD)</h2>
+          <p class="natural-subtext">Lihat tabel-tabel dan relasi aktif sesuai diagram arsitektur database kasir.</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-teal-outline" onclick="resetDatabaseToDefault()">
+            <i data-lucide="refresh-cw"></i>
+            <span>Reset ke Data Awal ERD</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ERD Table Tabs -->
+      <div class="erd-tabs-row" id="erdTableTabs">
+        <button class="erd-tab-pill active" onclick="showErdTable('tb_barang')">tb_barang</button>
+        <button class="erd-tab-pill" onclick="showErdTable('tb_penjualan')">tb_penjualan</button>
+        <button class="erd-tab-pill" onclick="showErdTable('tb_detail_penjualan')">tb_detail_penjualan</button>
+        <button class="erd-tab-pill" onclick="showErdTable('tb_user')">tb_user</button>
+        <button class="erd-tab-pill" onclick="showErdTable('roles')">roles</button>
+        <button class="erd-tab-pill" onclick="showErdTable('tb_sekolah')">tb_sekolah</button>
+        <button class="erd-tab-pill" onclick="showErdTable('tb_kategori')">tb_kategori</button>
+        <button class="erd-tab-pill" onclick="showErdTable('tb_kelompok_kategori')">tb_kelompok_kategori</button>
+        <button class="erd-tab-pill" onclick="showErdTable('tb_supplier')">tb_supplier</button>
+        <button class="erd-tab-pill" onclick="showErdTable('tb_pelanggan')">tb_pelanggan</button>
+      </div>
+
+      <!-- Raw Table Data Viewer Card -->
+      <div class="teal-table-card">
+        <div class="erd-viewer-header">
+          <h4 id="erdCurrentTableTitle" style="font-weight: 800; color: #042f2e;">Tabel: tb_barang</h4>
+          <span id="erdRecordCountBadge" class="erd-count-badge">0 Baris</span>
+        </div>
+        <div class="table-responsive">
+          <table class="ocean-table" id="erdRawDataTable">
+            <thead id="erdRawTableHead"></thead>
+            <tbody id="erdRawTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="shared.js"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      initSharedNavbar('erd');
+      showErdTable('tb_barang');
+    });
+
+    function showErdTable(tableName) {
+      document.querySelectorAll('.erd-tab-pill').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.trim() === tableName);
+      });
+
+      const title = document.getElementById('erdCurrentTableTitle');
+      const countBadge = document.getElementById('erdRecordCountBadge');
+      const thead = document.getElementById('erdRawTableHead');
+      const tbody = document.getElementById('erdRawTableBody');
+
+      if (!db[tableName]) return;
+
+      const records = db[tableName];
+      title.textContent = `Tabel: ${tableName}`;
+      countBadge.textContent = `${records.length} Baris Data`;
+
+      thead.innerHTML = '';
+      tbody.innerHTML = '';
+
+      if (records.length === 0) {
+        tbody.innerHTML = `<tr><td style="text-align: center; color: #94a3b8; padding: 24px;">Tabel kosong (0 data)</td></tr>`;
+        return;
+      }
+
+      const columns = Object.keys(records[0]);
+      const headerTr = document.createElement('tr');
+      columns.forEach(col => {
+        const th = document.createElement('th');
+        th.textContent = col;
+        headerTr.appendChild(th);
+      });
+      thead.appendChild(headerTr);
+
+      records.forEach(rec => {
+        const tr = document.createElement('tr');
+        columns.forEach(col => {
+          const td = document.createElement('td');
+          const val = rec[col];
+          if (typeof val === 'string' && val.startsWith('data:image')) {
+            td.innerHTML = `<span title="Data URL Foto" style="color: #0f766e; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700;">[Foto Gambar ${val.length} bytes]</span>`;
+          } else {
+            td.textContent = (val !== null && val !== undefined) ? val : 'NULL';
+          }
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+    }
+  </script>
+</body>
+</html>
