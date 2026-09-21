@@ -80,8 +80,12 @@
     let activeTable = 'tb_sekolah';
 
     window.addEventListener('DOMContentLoaded', () => {
-      initSharedLayout('pengaturan');
-      showErdTable('tb_sekolah');
+      const urlParams = new URLSearchParams(window.location.search);
+      const reqTable = urlParams.get('table') || urlParams.get('tab') || 'tb_sekolah';
+      const menuActive = (reqTable === 'tb_sekolah' && urlParams.get('table')) ? 'sekolah' : 'pengaturan';
+
+      initSharedLayout(menuActive);
+      showErdTable(reqTable);
     });
 
     function showErdTable(tableName) {

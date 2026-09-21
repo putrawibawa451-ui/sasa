@@ -291,10 +291,18 @@
     let activeUserTab = 'users';
 
     window.addEventListener('DOMContentLoaded', () => {
-      initSharedLayout('user');
+      const urlParams = new URLSearchParams(window.location.search);
+      const reqTab = urlParams.get('tab');
+      const isApprovalTab = reqTab === 'approvals' || reqTab === 'approval';
+
+      initSharedLayout(isApprovalTab ? 'approvals' : 'user');
       updateApprovalBadge();
       renderUserTable();
       renderApprovalTable();
+
+      if (isApprovalTab) {
+        switchUserTab('approvals');
+      }
     });
 
     function switchUserTab(tab) {

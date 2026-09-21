@@ -2874,6 +2874,11 @@ function initSharedLayout(activeMenu = 'dashboard') {
   if (!user) return;
 
   const currentSchool = getActiveSchool();
+  const userRoleStr = (user.role_name || (user.id_role === 1 ? 'super admin' : (user.id_role === 2 ? 'admin' : 'kasir'))).toLowerCase();
+  const isSuperAdmin = userRoleStr === 'super admin' || user.id_role === 1;
+  const isAdmin = userRoleStr === 'admin' || user.id_role === 2;
+  const isKasir = !isSuperAdmin && !isAdmin;
+  const allPending = (db.tb_approval_requests || []).filter(r => r.status === 'pending');
 
   // 1. Render atau isi Sidebar jika elemen container ada
   const sidebarContainer = document.getElementById('appSidebar');
@@ -2893,6 +2898,7 @@ function initSharedLayout(activeMenu = 'dashboard') {
       </div>
 
       <nav class="sidebar-nav">
+        <!-- 1. Operasional & Transaksi -->
         <a href="dashboard.html" class="sidebar-link ${activeMenu === 'dashboard' ? 'active' : ''}" data-menu="dashboard" onclick="closeMobileSidebar()">
           <i data-lucide="layout-dashboard"></i>
           <span>Dashboard</span>
@@ -2901,13 +2907,19 @@ function initSharedLayout(activeMenu = 'dashboard') {
           <i data-lucide="shopping-cart"></i>
           <span>Kasir / Transaksi</span>
         </a>
-        <a href="pembelian.html" class="sidebar-link ${activeMenu === 'pembelian' ? 'active' : ''}" data-menu="pembelian" onclick="closeMobileSidebar()">
-          <i data-lucide="truck"></i>
-          <span>Pembelian</span>
-        </a>
         <a href="barang.html" class="sidebar-link ${activeMenu === 'produk' || activeMenu === 'inventory' ? 'active' : ''}" data-menu="produk" onclick="closeMobileSidebar()">
           <i data-lucide="package"></i>
           <span>Produk</span>
+        </a>
+        <a href="transaksi.html" class="sidebar-link ${activeMenu === 'laporan' || activeMenu === 'transactions' ? 'active' : ''}" data-menu="laporan" onclick="closeMobileSidebar()">
+          <i data-lucide="file-text"></i>
+          <span>Laporan</span>
+        </a>
+
+        ${!isKasir ? `
+        <a href="pembelian.html" class="sidebar-link ${activeMenu === 'pembelian' ? 'active' : ''}" data-menu="pembelian" onclick="closeMobileSidebar()">
+          <i data-lucide="truck"></i>
+          <span>Pembelian</span>
         </a>
         <a href="kasir.html?tab=pelanggan" class="sidebar-link ${activeMenu === 'pelanggan' ? 'active' : ''}" data-menu="pelanggan" onclick="closeMobileSidebar()">
           <i data-lucide="users"></i>
@@ -2919,16 +2931,53 @@ function initSharedLayout(activeMenu = 'dashboard') {
         </a>
         <a href="user.html" class="sidebar-link ${activeMenu === 'user' ? 'active' : ''}" data-menu="user" onclick="closeMobileSidebar()">
           <i data-lucide="user-check"></i>
-          <span>User</span>
+          <span>Manajemen User</span>
         </a>
-        <a href="transaksi.html" class="sidebar-link ${activeMenu === 'laporan' || activeMenu === 'transactions' ? 'active' : ''}" data-menu="laporan" onclick="closeMobileSidebar()">
-          <i data-lucide="file-text"></i>
-          <span>Laporan</span>
-        </a>
-        <a href="database.html" class="sidebar-link ${activeMenu === 'pengaturan' || activeMenu === 'erd' ? 'active' : ''}" data-menu="pengaturan" onclick="closeMobileSidebar()">
-          <i data-lucide="settings"></i>
-          <span>Pengaturan</span>
-        </a>
+        ` : ''}
+
+        <!-- ========================================================
+             MENU YANG BISA DIAKSES SUPER ADMIN
+             - Persetujuan Registrasi Akun (dengan counter pending)
+             - Kelola Multi-Tenant (Sekolah)
+             - Database Relasional & ERD Sistem
+             ======================================================== -->
+        ${isSuperAdmin ? `
+          <div class="sidebar-section-divider" style="margin: 14px 10px 6px; padding: 10px 8px 4px; border-top: 1px dashed rgba(255,255,255,0.22);">
+            <div style="font-size: 0.67rem; font-weight: 800; color: #fecaca; letter-spacing: 0.8px; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
+              <i data-lucide="crown" style="width: 14px; height: 14px; color: #f87171;"></i>
+              <span>Menu Super Admin</span>
+            </div>
+          </div>
+          <a href="user.html?tab=approvals" class="sidebar-link ${activeMenu === 'approvals' || activeMenu === 'approval' ? 'active' : ''}" data-menu="approvals" onclick="closeMobileSidebar()" title="Persetujuan Akun Pendaftaran Baru">
+            <i data-lucide="shield-check" style="color: #f87171;"></i>
+            <span>Persetujuan Registrasi</span>
+            ${allPending.length > 0 ? `<span class="badge-pending-count" style="margin-left: auto; background: #ef4444; color: white; font-size: 0.68rem; font-weight: 800; padding: 2px 7px; border-radius: 9999px;">${allPending.length}</span>` : ''}
+          </a>
+          <a href="database.html?table=tb_sekolah" class="sidebar-link ${activeMenu === 'sekolah' || activeMenu === 'tenant' ? 'active' : ''}" data-menu="sekolah" onclick="closeMobileSidebar()" title="Kelola Sekolah / Unit Multi-Tenant">
+            <i data-lucide="building-2" style="color: #f87171;"></i>
+            <span>Kelola Multi-Tenant</span>
+          </a>
+          <a href="database.html" class="sidebar-link ${activeMenu === 'pengaturan' || activeMenu === 'erd' ? 'active' : ''}" data-menu="pengaturan" onclick="closeMobileSidebar()" title="Database Relasional &amp; ERD">
+            <i data-lucide="database" style="color: #f87171;"></i>
+            <span>Database &amp; ERD</span>
+          </a>
+        ` : (isAdmin ? `
+          <div class="sidebar-section-divider" style="margin: 14px 10px 6px; padding: 10px 8px 4px; border-top: 1px dashed rgba(255,255,255,0.22);">
+            <div style="font-size: 0.67rem; font-weight: 800; color: #bae6fd; letter-spacing: 0.8px; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
+              <i data-lucide="shield" style="width: 14px; height: 14px; color: #38bdf8;"></i>
+              <span>Menu Admin</span>
+            </div>
+          </div>
+          <a href="user.html?tab=approvals" class="sidebar-link ${activeMenu === 'approvals' || activeMenu === 'approval' ? 'active' : ''}" data-menu="approvals" onclick="closeMobileSidebar()">
+            <i data-lucide="user-check" style="color: #38bdf8;"></i>
+            <span>Persetujuan Kasir</span>
+            ${allPending.filter(r => (r.requested_role || '').toLowerCase() === 'kasir').length > 0 ? `<span class="badge-pending-count" style="margin-left: auto; background: #0284c7; color: white; font-size: 0.68rem; font-weight: 800; padding: 2px 7px; border-radius: 9999px;">${allPending.filter(r => (r.requested_role || '').toLowerCase() === 'kasir').length}</span>` : ''}
+          </a>
+          <a href="database.html" class="sidebar-link ${activeMenu === 'pengaturan' || activeMenu === 'erd' ? 'active' : ''}" data-menu="pengaturan" onclick="closeMobileSidebar()">
+            <i data-lucide="settings" style="color: #38bdf8;"></i>
+            <span>Pengaturan Database</span>
+          </a>
+        ` : '')}
       </nav>
 
       <div class="sidebar-footer">
@@ -3123,10 +3172,18 @@ function initSharedLayout(activeMenu = 'dashboard') {
       <i data-lucide="package"></i>
       <span>Produk</span>
     </a>
+    ${isSuperAdmin ? `
+    <a href="user.html?tab=approvals" class="mobile-nav-item ${activeMenu === 'approvals' || activeMenu === 'approval' ? 'active' : ''}" style="position: relative;">
+      <i data-lucide="shield-check" style="color: #f87171;"></i>
+      <span>Approval</span>
+      ${allPending.length > 0 ? `<span style="position: absolute; top: 2px; right: 20%; background: #ef4444; color: white; font-size: 0.6rem; font-weight: 800; padding: 1px 5px; border-radius: 9999px;">${allPending.length}</span>` : ''}
+    </a>
+    ` : `
     <a href="transaksi.html" class="mobile-nav-item ${activeMenu === 'laporan' || activeMenu === 'transactions' ? 'active' : ''}">
       <i data-lucide="file-text"></i>
       <span>Laporan</span>
     </a>
+    `}
     <button type="button" class="mobile-nav-item btn-open-drawer" onclick="toggleSidebar()" title="Buka Menu Lengkap">
       <i data-lucide="menu"></i>
       <span>Menu</span>
