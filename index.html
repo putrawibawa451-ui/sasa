@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kasir Pintar - Gateway & Portal Modul POS</title>
+  <title>POS SEKOLAH - Gateway & Portal Sistem Kasir Multi Tenant</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,700&display=swap" rel="stylesheet">
   
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="style.css" />
@@ -28,7 +28,7 @@
       border: 1px solid #ccfbf1;
       border-radius: 1.5rem;
       box-shadow: 0 20px 40px -15px rgba(15, 118, 110, 0.12), 0 0 1px rgba(0,0,0,0.05);
-      max-width: 820px;
+      max-width: 900px;
       width: 100%;
       padding: 2.5rem;
       text-align: center;
@@ -51,19 +51,19 @@
       font-weight: 800;
       color: #0f172a;
       letter-spacing: -0.03em;
-      margin-bottom: 0.75rem;
+      margin-bottom: 0.5rem;
     }
     .portal-subtitle {
       color: #475569;
-      font-size: 1rem;
-      max-width: 580px;
-      margin: 0 auto 2rem auto;
+      font-size: 0.98rem;
+      max-width: 620px;
+      margin: 0 auto 1.8rem auto;
       line-height: 1.6;
     }
     .portal-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1.25rem;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
       text-align: left;
       margin-bottom: 2rem;
     }
@@ -77,7 +77,6 @@
       text-decoration: none;
       transition: all 0.2s ease;
       position: relative;
-      overflow: hidden;
     }
     .portal-item:hover {
       transform: translateY(-3px);
@@ -86,25 +85,26 @@
       background: #ffffff;
     }
     .portal-item-icon {
-      width: 44px;
-      height: 44px;
+      width: 42px;
+      height: 42px;
       border-radius: 0.75rem;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 1rem;
-      font-size: 1.25rem;
+      margin-bottom: 0.85rem;
     }
     .icon-login { background: #fee2e2; color: #dc2626; }
     .icon-dash { background: #e0f2fe; color: #0284c7; }
     .icon-pos { background: #ccfbf1; color: #0f766e; }
     .icon-barang { background: #fef3c7; color: #d97706; }
+    .icon-user { background: #fce7f3; color: #db2777; }
+    .icon-pembelian { background: #ffedd5; color: #ea580c; }
     .icon-trans { background: #f3e8ff; color: #7e22ce; }
     .icon-erd { background: #e2e8f0; color: #334155; }
     
     .portal-item-title {
       font-weight: 700;
-      font-size: 1.05rem;
+      font-size: 1.02rem;
       color: #0f172a;
       margin-bottom: 0.35rem;
       display: flex;
@@ -112,7 +112,7 @@
       justify-content: space-between;
     }
     .portal-item-desc {
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       color: #64748b;
       line-height: 1.5;
     }
@@ -148,12 +148,12 @@
     <div class="portal-card">
       <div class="portal-badge">
         <i data-lucide="layers"></i>
-        <span>Sistem Modular Multi-Halaman Terpisah</span>
+        <span>Sistem Kasir Multi Tenant</span>
       </div>
 
-      <h1 class="portal-title">KASIR <span class="text-blue">PINTAR</span> & <span class="text-teal">INVENTARIS</span></h1>
+      <h1 class="portal-title">POS <span class="text-teal">SEKOLAH</span></h1>
       <p class="portal-subtitle">
-        Setiap fitur kasir dan manajemen telah dipisahkan menjadi halaman independen namun tetap terhubung secara otomatis ke basis data relasional ERD (localStorage).
+        Sistem kasir dan manajemen multi-tenant dengan tata letak Sidebar Kiri & Top Bar sesuai wireframe 6 modul, lengkap dengan persistensi database relasional ERD.
       </p>
 
       <div id="redirectStatus" class="redirect-banner">
@@ -168,91 +168,119 @@
             <i data-lucide="log-in"></i>
           </div>
           <div class="portal-item-title">
-            <span>1. Login Masuk</span>
+            <span>1. Halaman Login</span>
             <i data-lucide="arrow-right" style="width:16px;height:16px;"></i>
           </div>
           <div class="portal-item-desc">
-            Halaman autentikasi dominan <strong>Merah & Biru</strong> dengan tombol akun instan (Kasir, Admin, Super Admin).
+            Multi-Tenant dropdown, username, password, ingat saya, lupa password, dan footer copyright.
           </div>
         </a>
 
-        <!-- 2. Kasir POS -->
-        <a href="kasir.html" class="portal-item">
-          <div class="portal-item-icon icon-pos">
-            <i data-lucide="shopping-cart"></i>
-          </div>
-          <div class="portal-item-title">
-            <span>2. Kasir POS</span>
-            <i data-lucide="arrow-right" style="width:16px;height:16px;"></i>
-          </div>
-          <div class="portal-item-desc">
-            Mesin kasir cerah dengan foto barang, barcode scanner, keranjang, 4 metode bayar (Tunai, QRIS, Debit, Kredit) & cetak struk thermal.
-          </div>
-        </a>
-
-        <!-- 3. Kelola Barang -->
-        <a href="barang.html" class="portal-item">
-          <div class="portal-item-icon icon-barang">
-            <i data-lucide="package"></i>
-          </div>
-          <div class="portal-item-title">
-            <span>3. Kelola Barang</span>
-            <i data-lucide="arrow-right" style="width:16px;height:16px;"></i>
-          </div>
-          <div class="portal-item-desc">
-            Katalog inventaris dengan upload foto produk, preset ilustrasi, tombol nominal Rupiah cepat, dan soft delete.
-          </div>
-        </a>
-
-        <!-- 4. Dashboard -->
+        <!-- 2. Dashboard -->
         <a href="dashboard.html" class="portal-item">
           <div class="portal-item-icon icon-dash">
             <i data-lucide="layout-dashboard"></i>
           </div>
           <div class="portal-item-title">
-            <span>4. Dashboard</span>
+            <span>2. Dashboard</span>
             <i data-lucide="arrow-right" style="width:16px;height:16px;"></i>
           </div>
           <div class="portal-item-desc">
-            Ringkasan omset harian, jumlah transaksi, total produk aktif, serta peringatan stok menipis secara realtime.
+            4 Kartu KPI, Grafik Penjualan (7 Hari Terakhir) interaktif, dan tabel Transaksi Terbaru.
           </div>
         </a>
 
-        <!-- 5. Riwayat Transaksi -->
+        <!-- 3. Kasir / Transaksi & Pelanggan -->
+        <a href="kasir.html" class="portal-item">
+          <div class="portal-item-icon icon-pos">
+            <i data-lucide="shopping-cart"></i>
+          </div>
+          <div class="portal-item-title">
+            <span>3. Kasir & Pelanggan</span>
+            <i data-lucide="arrow-right" style="width:16px;height:16px;"></i>
+          </div>
+          <div class="portal-item-desc">
+            Tab Transaksi & Data Pelanggan, Barcode scan, tabel keranjang, diskon, tombol Bersihkan & Bayar (4 metode).
+          </div>
+        </a>
+
+        <!-- 4. Produk, Kelompok & Kategori -->
+        <a href="barang.html" class="portal-item">
+          <div class="portal-item-icon icon-barang">
+            <i data-lucide="package"></i>
+          </div>
+          <div class="portal-item-title">
+            <span>4. Data Produk</span>
+            <i data-lucide="arrow-right" style="width:16px;height:16px;"></i>
+          </div>
+          <div class="portal-item-desc">
+            3 Tab (Produk, Kategori, Kelompok), Filter Kategori/Status, Pagination, Foto produk & Tombol Rupiah.
+          </div>
+        </a>
+
+        <!-- 5. Manajemen User -->
+        <a href="user.html" class="portal-item">
+          <div class="portal-item-icon icon-user">
+            <i data-lucide="user-check"></i>
+          </div>
+          <div class="portal-item-title">
+            <span>5. Manajemen User</span>
+            <i data-lucide="arrow-right" style="width:16px;height:16px;"></i>
+          </div>
+          <div class="portal-item-desc">
+            Data user (Nama, Username, Role, Status), filter role, pagination, dan modal tambah user baru.
+          </div>
+        </a>
+
+        <!-- 6. Pembelian & Supplier -->
+        <a href="pembelian.html" class="portal-item">
+          <div class="portal-item-icon icon-pembelian">
+            <i data-lucide="truck"></i>
+          </div>
+          <div class="portal-item-title">
+            <span>6. Pembelian & Supplier</span>
+            <i data-lucide="arrow-right" style="width:16px;height:16px;"></i>
+          </div>
+          <div class="portal-item-desc">
+            2 Tab (Pembelian & Supplier), filter rentang tanggal, status Selesai/Diproses, dan modal catat beli.
+          </div>
+        </a>
+
+        <!-- 7. Laporan -->
         <a href="transaksi.html" class="portal-item">
           <div class="portal-item-icon icon-trans">
-            <i data-lucide="history"></i>
+            <i data-lucide="file-text"></i>
           </div>
           <div class="portal-item-title">
-            <span>5. Transaksi</span>
+            <span>7. Laporan Penjualan</span>
             <i data-lucide="arrow-right" style="width:16px;height:16px;"></i>
           </div>
           <div class="portal-item-desc">
-            Daftar seluruh nota penjualan, rincian pembayaran, filter tanggal/metode, dan fitur cetak ulang nota thermal.
+            Rekap transaksi penjualan, filter cara bayar, cetak ulang struk thermal, dan export CSV.
           </div>
         </a>
 
-        <!-- 6. Basis Data ERD -->
+        <!-- 8. Pengaturan ERD -->
         <a href="database.html" class="portal-item">
           <div class="portal-item-icon icon-erd">
-            <i data-lucide="database"></i>
+            <i data-lucide="settings"></i>
           </div>
           <div class="portal-item-title">
-            <span>6. Database ERD</span>
+            <span>8. Pengaturan ERD</span>
             <i data-lucide="arrow-right" style="width:16px;height:16px;"></i>
           </div>
           <div class="portal-item-desc">
-            Penampil struktur 10 tabel relasional sesuai skema ERD lengkap, ekspor JSON, dan tombol reset database awal.
+            Inspektor 10 tabel relasional ERD lengkap, export JSON, dan tombol reset database default.
           </div>
         </a>
       </div>
 
       <div class="portal-footer">
         <div>
-          <strong>Status Database:</strong> <span id="dbStatus">Terhubung ke localStorage</span>
+          <strong>Tenant Aktif:</strong> <span id="portalTenantName">SMKN 2 Tasikmalaya</span>
         </div>
         <div>
-          <span>Desain Natural Typography &bull; Teal-Ocean Tone</span>
+          <span>Nuansa Warna Teal-Oceanic &bull; Natural Typography</span>
         </div>
       </div>
     </div>
@@ -263,6 +291,10 @@
     window.addEventListener('DOMContentLoaded', () => {
       loadDatabase();
       if (window.lucide) lucide.createIcons();
+
+      const school = getActiveSchool();
+      const schoolEl = document.getElementById('portalTenantName');
+      if (schoolEl) schoolEl.textContent = school.nama_sekolah;
 
       const user = getCurrentUser();
       const redirectText = document.getElementById('redirectText');

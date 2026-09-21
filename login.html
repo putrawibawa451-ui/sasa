@@ -3,190 +3,1111 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Masuk - Kasir Pintar POS & Inventaris</title>
-  
+  <title>Login & Registrasi Kasir - POS Multi-Tenant</title>
+
+  <!-- Google Fonts: Roboto Mono (Konsistensi Seluruh Sistem) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --font-mono: 'Roboto Mono', monospace, -apple-system, sans-serif;
+      --forest-dark: #0f3822;
+      --forest-primary: #1b5e20;
+      --green-emerald: #10b981;
+      --green-leaf: #2e7d32;
+      --green-light: #a5d6a7;
+      --card-bg: rgba(255, 255, 255, 0.90);
+      --card-border: rgba(255, 255, 255, 0.95);
+      --input-line: #a7f3d0;
+      --input-line-focus: #059669;
+      --text-main: #143522;
+      --text-muted: #527964;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-mono);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    html, body {
+      height: 100%;
+      height: 100vh;
+      height: 100dvh;
+      margin: 0;
+      padding: 0;
+      overflow: hidden; /* Layar penuh & tidak bisa geser ke bawah */
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at 45% 20%, #eefbf1 0%, #d1f2d9 28%, #8ec5a1 60%, #1e4631 100%);
+      color: var(--text-main);
+      padding: 10px 16px;
+      position: relative;
+      overflow: hidden; /* Terkunci penuh tanpa scrollbar */
+    }
+
+    /* Ambient Hutan Hijau Alami */
+    body::before {
+      content: '';
+      position: absolute;
+      width: 700px;
+      height: 700px;
+      background: radial-gradient(circle, rgba(167, 243, 208, 0.45) 0%, rgba(52, 211, 153, 0.15) 50%, transparent 75%);
+      top: -150px;
+      left: 10%;
+      border-radius: 50%;
+      filter: blur(60px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.3) 0%, rgba(5, 150, 105, 0.1) 50%, transparent 70%);
+      bottom: -100px;
+      right: 5%;
+      border-radius: 50%;
+      filter: blur(50px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .app-viewport {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 940px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Brand Header */
+    .top-brand-strip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      max-width: 900px;
+      margin-bottom: 16px;
+    }
+
+    .brand-title-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(12px);
+      padding: 6px 16px;
+      border-radius: 999px;
+      border: 1.5px solid rgba(255, 255, 255, 0.85);
+      box-shadow: 0 4px 15px rgba(20, 53, 34, 0.08);
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      color: var(--forest-primary);
+      text-transform: uppercase;
+    }
+
+    .brand-title-badge svg {
+      width: 16px;
+      height: 16px;
+      stroke: var(--green-emerald);
+    }
+
+    /* ==========================================================================
+       KOMPOSISI KARTU ASIMETRIS SESUAI GAMBAR REFERENSI (KOMPAK & RAMPING)
+       - Ukuran lebih ramping, proporsional, dan pas dalam 1 layar penuh
+       ========================================================================== */
+    .stage-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 720px;
+      min-height: 410px;
+      display: flex;
+      align-items: center;
+    }
+
+    /* KARTU FORM UTAMA (DASAR KACA LEMBUT) */
+    .main-form-card {
+      position: relative;
+      width: 100%;
+      min-height: 395px;
+      background: rgba(255, 255, 255, 0.90);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: 24px;
+      border: 1.5px solid var(--card-border);
+      box-shadow: 0 20px 45px -12px rgba(15, 56, 34, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.7);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      transition: all 0.5s ease;
+    }
+
+    /* DUA PANE FORM: KIRI (DAFTAR) & KANAN (LOGIN) */
+    .form-pane {
+      padding: 18px 26px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      height: 100%;
+      min-height: 395px;
+      transition: opacity 0.35s ease, transform 0.35s ease, visibility 0.35s ease;
+    }
+
+    .form-pane-left {
+      grid-column: 1;
+    }
+
+    .form-pane-right {
+      grid-column: 2;
+    }
+
+    /* VISIBILITY CONTROL & ANTI-INTERCEPT:
+       - Mode LOGIN: Pane Kanan (Login) aktif, Pane Kiri (Daftar) tidak terlihat & tidak menangkap klik
+       - Mode REGISTER: Pane Kiri (Daftar) aktif, Pane Kanan (Login) tidak terlihat & tidak menangkap klik
+    */
+    .stage-wrapper.mode-login .form-pane-left {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      z-index: 1;
+      transform: translateX(-15px);
+    }
+
+    .stage-wrapper.mode-login .form-pane-right {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      z-index: 10;
+      transform: translateX(0);
+    }
+
+    .stage-wrapper.mode-register .form-pane-left {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      z-index: 10;
+      transform: translateX(0);
+    }
+
+    .stage-wrapper.mode-register .form-pane-right {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      z-index: 1;
+      transform: translateX(15px);
+    }
+
+    /* ==========================================================================
+       KARTU ILUSTRASI HUTAN YANG MENONJOL (PROTRUDING ARTWORK CARD)
+       - Melayang keluar dari kartu dasar (+12px atas, +12px bawah)
+       - Border-radius 24px rapi dan serasi dengan kartu utama
+       - Smooth transition: di KIRI saat Login, di KANAN saat Daftar
+       ========================================================================== */
+    .protruding-art-card {
+      position: absolute;
+      top: -12px;
+      bottom: -12px;
+      width: calc(50% + 7px);
+      background: #0f3822;
+      border-radius: 24px;
+      overflow: hidden;
+      z-index: 5;
+      box-shadow: 0 18px 40px -8px rgba(15, 56, 34, 0.32), 0 0 0 1.5px rgba(255, 255, 255, 0.85);
+      transition: transform 0.65s cubic-bezier(0.25, 1, 0.5, 1);
+      pointer-events: none;
+    }
+
+    /* Mode LOGIN: Ilustrasi Hutan di Sisi KIRI */
+    .stage-wrapper.mode-login .protruding-art-card {
+      left: -7px;
+      transform: translateX(0);
+    }
+
+    /* Mode DAFTAR: Ilustrasi Hutan Meluncur ke Sisi KANAN */
+    .stage-wrapper.mode-register .protruding-art-card {
+      left: -7px;
+      transform: translateX(calc(100% - 7px));
+    }
+
+    /* Gambar Ilustrasi Hutan Alami */
+    .art-image-inner {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      border-radius: 24px;
+    }
+
+    .art-image-inner img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+      border-radius: 24px;
+      transition: transform 0.8s ease;
+    }
+
+    /* Kilau Cahaya Alami Halus Sesuai Gambar Referensi */
+    .art-image-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, transparent 45%, rgba(15, 56, 34, 0.35) 100%);
+      pointer-events: none;
+      border-radius: 24px;
+    }
+
+    /* ==========================================================================
+       TAMPILAN FORMULIR KOMPAK SESUAI GAMBAR REFERENSI
+       - Judul proporsional "Login" / "Daftar Kasir"
+       - Underline input rapi & kompak dengan ikon di sisi kanan
+       - Tombol kapsul pill lebar penuh yang proporsional
+       ========================================================================== */
+    .form-heading-title {
+      font-size: 1.32rem;
+      font-weight: 700;
+      color: var(--forest-dark);
+      text-align: center;
+      margin-bottom: 14px;
+      letter-spacing: 0.4px;
+    }
+
+    .input-row-minimal {
+      position: relative;
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .input-row-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2px;
+    }
+
+    .input-label-clean {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--forest-dark);
+      letter-spacing: 0.2px;
+    }
+
+    .input-field-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      border-bottom: 1.5px solid var(--input-line);
+      padding-bottom: 4px;
+      transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .input-field-container:focus-within {
+      border-bottom-color: var(--input-line-focus);
+      box-shadow: 0 1px 0 0 var(--input-line-focus);
+    }
+
+    .input-clean {
+      width: 100%;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--forest-dark);
+      padding-right: 24px;
+    }
+
+    .input-clean::placeholder {
+      color: #94a3b8;
+      font-size: 0.74rem;
+      font-weight: 400;
+    }
+
+    .input-select-clean {
+      width: 100%;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--forest-dark);
+      cursor: pointer;
+      padding-right: 24px;
+    }
+
+    .input-icon-right {
+      position: absolute;
+      right: 2px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--green-leaf);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      transition: color 0.2s ease;
+    }
+
+    .input-icon-right.interactive {
+      pointer-events: auto;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 3px;
+    }
+
+    .input-icon-right.interactive:hover {
+      color: var(--forest-dark);
+    }
+
+    .input-icon-right svg {
+      width: 15px;
+      height: 15px;
+      stroke-width: 2;
+    }
+
+    .input-field-container:focus-within .input-icon-right {
+      color: var(--input-line-focus);
+    }
+
+    /* TOMBOL PILL KAPSUL LEBAR PENUH (FULL WIDTH & KOMPAK) */
+    .btn-pill-action {
+      margin-top: 10px;
+      margin-bottom: 12px;
+      width: 100%;
+      border: none;
+      outline: none;
+      background: linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%);
+      color: #ffffff;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 10px 18px;
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-pill-action:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px -4px rgba(16, 185, 129, 0.5);
+      background: linear-gradient(135deg, #4ade80 0%, #10b981 50%, #047857 100%);
+    }
+
+    .btn-pill-action:active {
+      transform: translateY(0);
+    }
+
+    /* PILIHAN DI BAWAH SESUAI GAMBAR REFERENSI ("Create an account" & "Forgot password") */
+    .bottom-form-links {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      margin-top: 2px;
+      font-size: 0.74rem;
+    }
+
+    .link-subtle {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      cursor: pointer;
+      transition: color 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .link-subtle:hover {
+      color: var(--forest-primary);
+      text-decoration: underline;
+    }
+
+    .link-subtle.highlight {
+      font-weight: 700;
+      color: var(--forest-primary);
+    }
+
+    /* Quick Fill Demo Baris Kecil */
+    .quick-login-strip {
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px dashed rgba(167, 243, 208, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .quick-chip {
+      background: rgba(240, 253, 244, 0.95);
+      border: 1px solid #bbf7d0;
+      border-radius: 999px;
+      padding: 2.5px 8px;
+      font-size: 0.67rem;
+      font-weight: 600;
+      color: #166534;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .quick-chip:hover {
+      background: #dcfce7;
+      border-color: #86efac;
+      transform: translateY(-1px);
+    }
+
+    .quick-chip.admin {
+      background: #fef2f2;
+      border-color: #fecaca;
+      color: #991b1b;
+    }
+
+    .quick-chip.admin:hover {
+      background: #fee2e2;
+    }
+
+    /* Notice Box Approval */
+    .approval-alert {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 8px;
+      padding: 5px 8px;
+      font-size: 0.67rem;
+      color: #166534;
+      line-height: 1.3;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: flex-start;
+      gap: 5px;
+    }
+
+    .approval-alert svg {
+      width: 13px;
+      height: 13px;
+      color: var(--green-emerald);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* ==========================================================================
+       PILIHAN DAFTAR & LOGIN DI BAWAH (BOTTOM TOGGLE BAR)
+       - Permintaan: "dan buat pilihan daftar dan login jadi dibawah"
+       - Ukuran proporsional, kompak, dan elegan
+       ========================================================================== */
+    .bottom-mode-toggle-bar {
+      margin-top: 18px;
+      display: inline-flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1.5px solid rgba(255, 255, 255, 0.95);
+      border-radius: 999px;
+      padding: 4px;
+      box-shadow: 0 10px 24px rgba(15, 56, 34, 0.12);
+      position: relative;
+      z-index: 20;
+    }
+
+    .bottom-tab-btn {
+      border: none;
+      outline: none;
+      background: transparent;
+      padding: 8px 22px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      color: var(--forest-dark);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.25s ease;
+    }
+
+    .bottom-tab-btn svg {
+      width: 14px;
+      height: 14px;
+      stroke-width: 2.2;
+    }
+
+    .bottom-tab-btn.active {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      box-shadow: 0 5px 14px rgba(16, 185, 129, 0.38);
+    }
+
+    .bottom-tab-btn:not(.active):hover {
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--forest-primary);
+    }
+
+    /* Container Notifikasi Toast */
+    #toastContainer {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+      max-width: 90vw;
+    }
+
+    /* ==========================================================================
+       RESPONSIF MOBILE / SMARTPHONE (< 768px)
+       ========================================================================== */
+    @media (max-width: 768px) {
+      html, body {
+        height: auto;
+        min-height: 100%;
+        overflow-y: auto;
+      }
+
+      body {
+        padding: 12px 10px;
+        justify-content: flex-start;
+      }
+
+      .app-viewport {
+        width: 100%;
+        max-width: 100%;
+      }
+
+      .stage-wrapper {
+        min-height: auto;
+        width: 100%;
+        max-width: 100%;
+        flex-direction: column;
+      }
+
+      .main-form-card {
+        min-height: auto;
+        border-radius: 20px;
+        display: block;
+        width: 100%;
+        box-shadow: 0 12px 32px -10px rgba(15, 56, 34, 0.2);
+      }
+
+      .protruding-art-card {
+        position: relative;
+        top: 0;
+        bottom: 0;
+        left: 0 !important;
+        transform: none !important;
+        width: 100%;
+        height: 150px;
+        border-radius: 18px;
+        margin-bottom: 8px;
+        box-shadow: 0 8px 20px rgba(15, 56, 34, 0.18);
+        pointer-events: auto;
+      }
+
+      .form-pane {
+        width: 100%;
+        min-height: auto;
+        padding: 20px 16px;
+        transform: none !important;
+      }
+
+      .stage-wrapper.mode-login .form-pane-left {
+        display: none !important;
+      }
+      .stage-wrapper.mode-login .form-pane-right {
+        display: flex !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+      }
+      .stage-wrapper.mode-register .form-pane-right {
+        display: none !important;
+      }
+      .stage-wrapper.mode-register .form-pane-left {
+        display: flex !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+      }
+
+      .form-heading-title {
+        font-size: 1.25rem;
+        margin-bottom: 12px;
+      }
+
+      .btn-pill-action {
+        width: 100%;
+        padding: 9px 14px;
+        font-size: 0.82rem;
+      }
+
+      .bottom-form-links {
+        flex-direction: column;
+        gap: 6px;
+        text-align: center;
+      }
+
+      .bottom-mode-toggle-bar {
+        width: 100%;
+        max-width: 320px;
+        margin-top: 14px;
+      }
+
+      .bottom-tab-btn {
+        flex: 1;
+        justify-content: center;
+        padding: 7px 10px;
+        font-size: 0.74rem;
+      }
+    }
+  </style>
 </head>
-<body class="theme-teal-ocean">
+<body>
 
-  <!-- LOGIN SCREEN (DOMINAN WARNA MERAH & BIRU) -->
-  <div id="loginScreen" class="screen-wrapper login-view active">
-    <div class="login-bg-shapes">
-      <div class="shape-red"></div>
-      <div class="shape-blue"></div>
-      <div class="shape-glow"></div>
+  <!-- Container Notifikasi Toast Mandiri -->
+  <div id="toastContainer"></div>
+
+  <div class="app-viewport">
+
+    <!-- Top Brand Strip -->
+    <div class="top-brand-strip">
+      <div class="brand-title-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 10v.2A3 3 0 0 1 8.9 16v0H5v0h0a3 3 0 0 1-1.1-5.8V10a3 3 0 0 1 6 0Z"/><path d="M7 16v6"/><path d="M13 19v3"/><path d="M12 19h8.3a1 1 0 0 0 .7-1.7L18 14h.3a1 1 0 0 0 .7-1.7L16 9h.2a1 1 0 0 0 .8-1.7L13 3l-1.4 1.4"/></svg>
+        <span>POS KASIR PINTAR MULTI-TENANT</span>
+      </div>
     </div>
 
-    <div class="login-container">
-      <!-- Left side: Hero Branding -->
-      <div class="login-brand-side">
-        <div class="brand-badge-pill">
-          <i data-lucide="shield-check"></i>
-          <span>ERD Integrated POS v2.0</span>
-        </div>
-        <h1 class="brand-hero-title">
-          KASIR <span class="text-blue">PINTAR</span> & <span class="text-red">INVENTARIS</span>
-        </h1>
-        <p class="brand-hero-desc">
-          Sistem Point of Sale & Kasir Sekolah terintegrasi penuh dengan struktur database relasional (ERD). Cepat, akurat, dan mendukung multi-metode pembayaran modern serta foto barang.
-        </p>
+    <!-- ====================================================================
+         STAGE WRAPPER: KARTU UTAMA + KARTU ILUSTRASI MENONJOL (PROTRUDING)
+         Default: mode-login (Gambar di Kiri, Form Login di Kanan)
+         ==================================================================== -->
+    <div class="stage-wrapper mode-login" id="stageWrapper">
 
-        <div class="school-info-card">
-          <div class="school-icon">
-            <i data-lucide="graduation-cap"></i>
+      <!-- KARTU DASAR FORMS -->
+      <div class="main-form-card">
+
+        <!-- ================================================================
+             PANE FORM KIRI: DAFTAR KASIR (Aktif saat mode-register)
+             Lengkap: Username, Nama Lengkap, Email atau No. Telp, Password 2x, Sekolah
+             ================================================================ -->
+        <div class="form-pane form-pane-left" id="paneRegister">
+          <h2 class="form-heading-title">Daftar Kasir</h2>
+
+          <div class="approval-alert">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+            <div>Akun kasir baru berstatus <strong>Pending</strong> dan menunggu persetujuan Admin sebelum digunakan.</div>
           </div>
-          <div class="school-text">
-            <span class="school-label">Database Sekolah Aktif</span>
-            <strong id="loginSchoolName">SMA Negeri 1 Harapan Bangsa</strong>
-            <span class="school-code" id="loginSchoolCode">KODE: SCH-001</span>
+
+          <!-- 1. Username -->
+          <div class="input-row-minimal">
+            <div class="input-row-header">
+              <label class="input-label-clean" for="regUsername">Username</label>
+            </div>
+            <div class="input-field-container">
+              <input type="text" id="regUsername" class="input-clean" placeholder="username kasir (huruf & angka)" autocomplete="username" />
+              <div class="input-icon-right">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/></svg>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div class="erd-features-list">
-          <div class="feat-item"><i data-lucide="check-circle-2"></i> Sistem Halaman Multi-Modul Terpisah</div>
-          <div class="feat-item"><i data-lucide="check-circle-2"></i> Foto Produk Beresolusi Jelas & Preview</div>
-          <div class="feat-item"><i data-lucide="check-circle-2"></i> Tunai, QRIS Dinamis, Debit & Kredit</div>
-          <div class="feat-item"><i data-lucide="check-circle-2"></i> Tombol Pecahan Rupiah Cepat Otomatis</div>
-        </div>
-      </div>
-
-      <!-- Right side: Red-Blue Login Card -->
-      <div class="login-card-side">
-        <div class="login-card-header">
-          <div class="login-avatar-ring">
-            <i data-lucide="user-check"></i>
+          <!-- 2. Nama Lengkap -->
+          <div class="input-row-minimal">
+            <div class="input-row-header">
+              <label class="input-label-clean" for="regFullName">Nama Lengkap</label>
+            </div>
+            <div class="input-field-container">
+              <input type="text" id="regFullName" class="input-clean" placeholder="Nama lengkap kasir" autocomplete="name" />
+              <div class="input-icon-right">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+              </div>
+            </div>
           </div>
-          <h2>Masuk ke Sistem</h2>
-          <p>Pilih peran pengguna atau gunakan akun cepat</p>
-        </div>
 
-        <form id="loginForm" class="login-form" onsubmit="event.preventDefault(); handleLogin();">
-          <div class="form-group">
-            <label class="form-label">Pilih Peran (Role)</label>
-            <div class="role-selector-grid">
-              <button type="button" class="role-btn active" data-role="kasir" onclick="selectRole('kasir')">
-                <i data-lucide="shopping-bag"></i>
-                <span>Kasir</span>
-              </button>
-              <button type="button" class="role-btn" data-role="admin" onclick="selectRole('admin')">
-                <i data-lucide="settings"></i>
-                <span>Admin</span>
-              </button>
-              <button type="button" class="role-btn" data-role="super admin" onclick="selectRole('super admin')">
-                <i data-lucide="shield"></i>
-                <span>Super Admin</span>
+          <!-- 3. Email atau No. Telepon -->
+          <div class="input-row-minimal">
+            <div class="input-row-header">
+              <label class="input-label-clean" for="regEmailOrPhone">Email atau No. Telp</label>
+            </div>
+            <div class="input-field-container">
+              <input type="text" id="regEmailOrPhone" class="input-clean" placeholder="email@sekolah.sch.id atau 0812xxxx" autocomplete="email" />
+              <div class="input-icon-right">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Password -->
+          <div class="input-row-minimal">
+            <div class="input-row-header">
+              <label class="input-label-clean" for="regPassword">Password</label>
+            </div>
+            <div class="input-field-container">
+              <input type="password" id="regPassword" class="input-clean" placeholder="Minimal 3 karakter" />
+              <button type="button" class="input-icon-right interactive" onclick="toggleRegPassword('regPassword', this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
               </button>
             </div>
           </div>
 
-          <div class="form-group">
-            <label for="usernameInput" class="form-label">Username</label>
-            <div class="input-with-icon">
-              <i data-lucide="user" class="input-icon"></i>
-              <input type="text" id="usernameInput" class="form-control" placeholder="Masukkan username..." value="kasir" required />
+          <!-- 5. Konfirmasi Password (Password 2 Kali) -->
+          <div class="input-row-minimal">
+            <div class="input-row-header">
+              <label class="input-label-clean" for="regPasswordConfirm">Ulangi Password</label>
             </div>
-          </div>
-
-          <div class="form-group">
-            <label for="passwordInput" class="form-label">Password</label>
-            <div class="input-with-icon">
-              <i data-lucide="lock" class="input-icon"></i>
-              <input type="password" id="passwordInput" class="form-control" placeholder="Masukkan password..." value="123" required />
-              <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility()">
-                <i data-lucide="eye" id="pwdEyeIcon"></i>
+            <div class="input-field-container">
+              <input type="password" id="regPasswordConfirm" class="input-clean" placeholder="Ketik ulang password" />
+              <button type="button" class="input-icon-right interactive" onclick="toggleRegPassword('regPasswordConfirm', this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m21 2-2 2m-6 6 7 7-3 3-7-7v-3h-3l-2-2v-3h3l2 2Z"/><circle cx="7.5" cy="15.5" r="5.5"/></svg>
               </button>
             </div>
           </div>
 
-          <!-- Quick Test Credentials -->
-          <div class="quick-credentials-box">
-            <span class="quick-title">Akun Cepat (Klik untuk isi):</span>
-            <div class="quick-btn-row">
-              <button type="button" class="quick-acc-btn" onclick="fillDemoAccount('kasir', '123', 'kasir')">
-                <span class="role-dot dot-kasir"></span> Kasir
-              </button>
-              <button type="button" class="quick-acc-btn" onclick="fillDemoAccount('admin', '123', 'admin')">
-                <span class="role-dot dot-admin"></span> Admin
-              </button>
-              <button type="button" class="quick-acc-btn" onclick="fillDemoAccount('superadmin', '123', 'super admin')">
-                <span class="role-dot dot-super"></span> Super Admin
-              </button>
+          <!-- 6. Dropdown Sekolah -->
+          <div class="input-row-minimal">
+            <div class="input-row-header">
+              <label class="input-label-clean" for="regSchoolSelect">Sekolah / Instansi</label>
+            </div>
+            <div class="input-field-container">
+              <select id="regSchoolSelect" class="input-select-clean">
+                <!-- Diisi otomatis dari database -->
+              </select>
+              <div class="input-icon-right">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 22v-4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v4"/><path d="m18 10 4 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-8l4-2"/><path d="M18 5v17"/><path d="m4 6 8-4 8 4"/><path d="M6 5v17"/></svg>
+              </div>
             </div>
           </div>
 
-          <button type="submit" class="btn-login-submit">
-            <span>Masuk Sekarang</span>
-            <i data-lucide="arrow-right"></i>
+          <!-- Tombol Aksi Daftar -->
+          <button class="btn-pill-action" type="button" onclick="handleRegisterSubmit()">
+            <span>Daftar Sekarang</span>
           </button>
-        </form>
+
+          <!-- Pilihan di Bawah -->
+          <div class="bottom-form-links">
+            <a class="link-subtle highlight" onclick="switchToLogin()">Sudah punya akun? Login</a>
+            <a class="link-subtle" onclick="switchToLogin()">Batal</a>
+          </div>
+
+          <div style="margin-top: 10px; text-align: center;">
+            <a href="register-staff.html" class="link-subtle" style="font-size: 0.7rem; color: #b91c1c;">
+              Pendaftaran khusus <strong>Admin / Super Admin</strong> &rarr;
+            </a>
+          </div>
+        </div>
+
+        <!-- ================================================================
+             PANE FORM KANAN: LOGIN (Aktif saat mode-login)
+             ================================================================ -->
+        <div class="form-pane form-pane-right" id="paneLogin">
+          <h2 class="form-heading-title">Login</h2>
+
+          <!-- Email / Username / No. Telp -->
+          <div class="input-row-minimal">
+            <div class="input-row-header">
+              <label class="input-label-clean" for="usernameInput">Email / Username / No. Telp</label>
+            </div>
+            <div class="input-field-container">
+              <input type="text" id="usernameInput" class="input-clean" placeholder="Masukkan username, email, atau no. telp" autocomplete="username" />
+              <div class="input-icon-right">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div class="input-row-minimal">
+            <div class="input-row-header">
+              <label class="input-label-clean" for="passwordInput">Password</label>
+            </div>
+            <div class="input-field-container">
+              <input type="password" id="passwordInput" class="input-clean" placeholder="Masukkan password" autocomplete="current-password" onkeydown="if(event.key==='Enter') handleLoginSubmit()" />
+              <button type="button" class="input-icon-right interactive" onclick="toggleLoginPassword()">
+                <svg id="pwdEyeSvg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Dropdown Sekolah -->
+          <div class="input-row-minimal">
+            <div class="input-row-header">
+              <label class="input-label-clean" for="loginSchoolSelect">Sekolah / Instansi</label>
+            </div>
+            <div class="input-field-container">
+              <select id="loginSchoolSelect" class="input-select-clean">
+                <!-- Diisi otomatis dari database -->
+              </select>
+              <div class="input-icon-right">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 22v-4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v4"/><path d="m18 10 4 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-8l4-2"/><path d="M18 5v17"/><path d="m4 6 8-4 8 4"/><path d="M6 5v17"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tombol Aksi Login -->
+          <button class="btn-pill-action" id="loginBtn" type="button" onclick="handleLoginSubmit()">
+            <span>Login</span>
+          </button>
+
+          <!-- Pilihan di Bawah Sesuai Gambar Referensi -->
+          <div class="bottom-form-links">
+            <a class="link-subtle highlight" onclick="switchToRegister()">Create an account</a>
+            <a class="link-subtle" onclick="handleForgotPassword()">Forgot password</a>
+          </div>
+
+          <!-- Masuk Cepat Demo -->
+          <div class="quick-login-strip">
+            <span style="font-size: 0.7rem; color: #64748b; margin-right: 4px;">Demo:</span>
+            <button type="button" class="quick-chip admin" onclick="quickFillDemo('admin', '123')">👑 Super Admin</button>
+            <button type="button" class="quick-chip" onclick="quickFillDemo('andi', '123')">🛒 Kasir Andi</button>
+            <button type="button" class="quick-chip" onclick="quickFillDemo('budi', '123')">🛒 Kasir Budi</button>
+          </div>
+        </div>
+
       </div>
+
+      <!-- ====================================================================
+           KARTU ILUSTRASI HUTAN YANG MENONJOL (PROTRUDING)
+           Meluncur ke Kiri saat Login, Meluncur ke Kanan saat Daftar
+           ==================================================================== -->
+      <!-- ====================================================================
+           KARTU ILUSTRASI HUTAN SESUAI HALAMAN LOGIN REFERENSI
+           Bersih, utuh, tanpa badge penutup, dengan rounded corner 36px & soft shadow
+           ==================================================================== -->
+      <div class="protruding-art-card" id="protrudingArtCard">
+        <div class="art-image-inner">
+          <img src="assets/img/forest_illustration.jpg" alt="Ilustrasi Hutan Hijau Alami" />
+          <div class="art-image-overlay"></div>
+        </div>
+      </div>
+
     </div>
+
+    <!-- ====================================================================
+         PILIHAN DAFTAR DAN LOGIN DI BAWAH (BOTTOM TOGGLE BAR)
+         Sesuai Permintaan: "dan buat pilihan daftar dan login jadi dibawah"
+         ==================================================================== -->
+    <div class="bottom-mode-toggle-bar">
+      <button type="button" class="bottom-tab-btn active" id="btnBottomLogin" onclick="switchToLogin()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>LOGIN</span>
+      </button>
+      <button type="button" class="bottom-tab-btn" id="btnBottomRegister" onclick="switchToRegister()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
+        <span>DAFTAR</span>
+      </button>
+    </div>
+
   </div>
 
-  <div id="toastContainer" class="toast-container"></div>
-
+  <!-- Shared Script Modul Core -->
   <script src="shared.js"></script>
+
   <script>
-    let selectedRole = 'kasir';
+    let isRegisterMode = false;
 
-    window.addEventListener('DOMContentLoaded', () => {
-      loadDatabase();
-      const school = db.tb_sekolah[0] || {};
-      document.getElementById('loginSchoolName').textContent = school.nama_sekolah || 'SMA Negeri 1 Harapan Bangsa';
-      document.getElementById('loginSchoolCode').textContent = `KODE: ${school.kode_sekolah || 'SCH-001'}`;
-      if (window.lucide) lucide.createIcons();
-    });
+    // Toast Mandiri Anti-Error
+    function showToast(message, type = 'info') {
+      let container = document.getElementById('toastContainer');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        document.body.appendChild(container);
+      }
+      const toast = document.createElement('div');
+      toast.style.cssText = 'pointer-events:auto; padding:12px 20px; border-radius:12px; font-family:var(--font-mono); font-size:0.84rem; font-weight:600; display:flex; align-items:center; gap:10px; box-shadow:0 10px 25px rgba(0,0,0,0.25); color:#ffffff; margin-bottom:8px; transition:all 0.3s ease;';
+      
+      if (type === 'success') {
+        toast.style.background = '#059669';
+        toast.style.border = '1px solid #34d399';
+      } else if (type === 'error' || type === 'danger') {
+        toast.style.background = '#dc2626';
+        toast.style.border = '1px solid #f87171';
+      } else if (type === 'warning') {
+        toast.style.background = '#d97706';
+        toast.style.border = '1px solid #fbbf24';
+      } else {
+        toast.style.background = '#0284c7';
+        toast.style.border = '1px solid #38bdf8';
+      }
+      
+      toast.innerHTML = `<span>${message}</span>`;
+      container.appendChild(toast);
 
-    function selectRole(role) {
-      selectedRole = role;
-      document.querySelectorAll('.role-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('data-role') === role);
-      });
-      playSound('click');
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-10px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 3800);
     }
 
-    function fillDemoAccount(username, password, role) {
+    // Suara saat mengklik dihilangkan sesuai permintaan pengguna
+    function playSlideSound() {
+      // Hening
+    }
+
+    // ==========================================================================
+    // LOGIKA PERPINDAHAN DAFTAR & LOGIN (DI BAWAH)
+    // - Mode Login: Gambar di KIRI, Form Login di KANAN
+    // - Mode Register: Gambar Meluncur ke KANAN, Form Daftar di KIRI (100% Terbuka)
+    // ==========================================================================
+    function switchToRegister() {
+      isRegisterMode = true;
+      const stage = document.getElementById('stageWrapper');
+      stage.classList.remove('mode-login');
+      stage.classList.add('mode-register');
+
+      // Update Pilihan Tab Bawah
+      document.getElementById('btnBottomRegister').classList.add('active');
+      document.getElementById('btnBottomLogin').classList.remove('active');
+
+      setTimeout(() => {
+        const usernameInput = document.getElementById('regUsername');
+        if (usernameInput) usernameInput.focus();
+      }, 350);
+    }
+
+    function switchToLogin() {
+      isRegisterMode = false;
+      const stage = document.getElementById('stageWrapper');
+      stage.classList.remove('mode-register');
+      stage.classList.add('mode-login');
+
+      // Update Pilihan Tab Bawah
+      document.getElementById('btnBottomLogin').classList.add('active');
+      document.getElementById('btnBottomRegister').classList.remove('active');
+
+      setTimeout(() => {
+        const userInput = document.getElementById('usernameInput');
+        if (userInput) userInput.focus();
+      }, 350);
+    }
+
+    function toggleAuthMode() {
+      if (isRegisterMode) {
+        switchToLogin();
+      } else {
+        switchToRegister();
+      }
+    }
+
+    // Toggle Password Visibility
+    function toggleLoginPassword() {
+      const pwd = document.getElementById('passwordInput');
+      const svg = document.getElementById('pwdEyeSvg');
+      if (pwd.type === 'password') {
+        pwd.type = 'text';
+        svg.innerHTML = '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>';
+      } else {
+        pwd.type = 'password';
+        svg.innerHTML = '<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>';
+      }
+    }
+
+    function toggleRegPassword(inputId, btn) {
+      const input = document.getElementById(inputId);
+      const svg = btn.querySelector('svg');
+      if (input.type === 'password') {
+        input.type = 'text';
+        if (svg) svg.innerHTML = '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>';
+      } else {
+        input.type = 'password';
+        if (svg) svg.innerHTML = '<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>';
+      }
+    }
+
+    // Quick Login Demo
+    function quickFillDemo(username, password) {
+      switchToLogin();
       document.getElementById('usernameInput').value = username;
       document.getElementById('passwordInput').value = password;
-      selectRole(role);
-      playSound('click');
+      showToast(`Akun demo "${username}" siap! Klik tombol Login`, 'info');
     }
 
-    function togglePasswordVisibility() {
-      const pwdInput = document.getElementById('passwordInput');
-      const eyeIcon = document.getElementById('pwdEyeIcon');
-      if (pwdInput.type === 'password') {
-        pwdInput.type = 'text';
-        eyeIcon.setAttribute('data-lucide', 'eye-off');
-      } else {
-        pwdInput.type = 'password';
-        eyeIcon.setAttribute('data-lucide', 'eye');
-      }
-      lucide.createIcons();
+    function handleForgotPassword() {
+      showToast('Silakan hubungi Super Admin sekolah Anda untuk mereset kata sandi akun kasir.', 'info');
     }
 
-    function handleLogin() {
-      const username = document.getElementById('usernameInput').value.trim();
+    // ==========================================================================
+    // LOGIKA AUTENTIKASI LOGIN
+    // Mendukung login dengan Username, Email, atau No. Telepon
+    // ==========================================================================
+    function handleLoginSubmit() {
+      loadDatabase();
+      const identifier = document.getElementById('usernameInput').value.trim();
       const password = document.getElementById('passwordInput').value.trim();
+      const schoolId = document.getElementById('loginSchoolSelect').value;
 
-      const user = db.tb_user.find(u => u.username === username && u.password === password && u.is_active === 1);
-      if (!user) {
-        playSound('error');
-        showToast('Username atau password tidak cocok!', 'error');
+      if (!identifier || !password) {
+        showToast('Harap masukkan username/email/no. telp dan password Anda!', 'warning');
         return;
       }
 
+      const inputLower = identifier.toLowerCase();
+      const matchedUser = (db.tb_user || []).find(u => {
+        const uUser = (u.username || '').toLowerCase();
+        const uEmail = (u.email || '').toLowerCase();
+        const uPhone = (u.no_telepon || u.kontak || '').toLowerCase();
+        return (uUser === inputLower || uEmail === inputLower || uPhone === inputLower) && u.password === password;
+      });
+
+      if (!matchedUser) {
+        showToast('Username, email, atau password tidak cocok!', 'error');
+        return;
+      }
+
+      // Cek apakah akun berstatus PENDING
+      if (matchedUser.is_active !== 1 || matchedUser.status === 'Pending') {
+        const roleName = (matchedUser.role_name || (matchedUser.id_role === 1 ? 'Super Admin' : (matchedUser.id_role === 2 ? 'Admin' : 'Kasir'))).toUpperCase();
+        if (roleName.includes('SUPER') || roleName.includes('ADMIN')) {
+          showToast(`Akun "${matchedUser.nama_lengkap}" (${roleName}) masih MENUNGGU PERSETUJUAN Super Admin!`, 'warning');
+        } else {
+          showToast(`Akun Kasir "${matchedUser.nama_lengkap}" masih MENUNGGU PERSETUJUAN Admin sekolah!`, 'warning');
+        }
+        return;
+      }
+
+      // Cek apakah akun berstatus REJECTED
+      if (matchedUser.status === 'Rejected') {
+        showToast(`Permohonan akun "${matchedUser.nama_lengkap}" telah DITOLAK oleh pengelola sistem.`, 'error');
+        return;
+      }
+
+      const user = matchedUser;
+      localStorage.setItem('kasir_pintar_current_school_id', schoolId);
+
       const roleObj = db.roles.find(r => r.id_role === user.id_role);
-      user.role_name = roleObj ? roleObj.nama_role : selectedRole;
+      user.role_name = user.role_name || (roleObj ? roleObj.nama_role : 'kasir');
 
       localStorage.setItem('kasir_pintar_current_user', JSON.stringify(user));
-      playSound('success');
-      showToast(`Login berhasil! Mengalihkan ke aplikasi...`, 'success');
+      showToast(`Login berhasil sebagai ${user.nama_lengkap}! Mengalihkan...`, 'success');
 
       setTimeout(() => {
         if (user.role_name === 'kasir') {
@@ -194,8 +1115,134 @@
         } else {
           window.location.href = 'dashboard.html';
         }
-      }, 600);
+      }, 550);
     }
+
+    // ==========================================================================
+    // LOGIKA PENDAFTARAN KASIR LENGKAP
+    // Field: Username, Nama Lengkap, Email atau No. Telp, Password, Konfirmasi Password, Sekolah
+    // ==========================================================================
+    function handleRegisterSubmit() {
+      loadDatabase();
+      const schoolSelect = document.getElementById('regSchoolSelect');
+      const schoolId = schoolSelect ? Number(schoolSelect.value) : 1;
+
+      const username = document.getElementById('regUsername').value.trim().toLowerCase();
+      const name = document.getElementById('regFullName').value.trim();
+      const emailOrPhone = document.getElementById('regEmailOrPhone').value.trim();
+      const password = document.getElementById('regPassword').value.trim();
+      const passwordConfirm = document.getElementById('regPasswordConfirm').value.trim();
+
+      if (!username) {
+        showToast('Harap isi kolom Username!', 'error');
+        document.getElementById('regUsername').focus();
+        return;
+      }
+
+      if (!name) {
+        showToast('Harap isi kolom Nama Lengkap Kasir!', 'error');
+        document.getElementById('regFullName').focus();
+        return;
+      }
+
+      if (!emailOrPhone) {
+        showToast('Harap isi kolom Email atau No. Telepon!', 'error');
+        document.getElementById('regEmailOrPhone').focus();
+        return;
+      }
+
+      if (!password) {
+        showToast('Harap masukkan Password!', 'error');
+        document.getElementById('regPassword').focus();
+        return;
+      }
+
+      if (password.length < 3) {
+        showToast('Password minimal harus 3 karakter!', 'error');
+        document.getElementById('regPassword').focus();
+        return;
+      }
+
+      if (password !== passwordConfirm) {
+        showToast('Password dan konfirmasi password tidak sama!', 'error');
+        document.getElementById('regPasswordConfirm').focus();
+        return;
+      }
+
+      // Cek duplikasi username
+      const userExists = (db.tb_user || []).some(u => (u.username || '').toLowerCase() === username);
+      if (userExists) {
+        showToast(`Username "${username}" sudah digunakan! Gunakan username lain.`, 'error');
+        document.getElementById('regUsername').focus();
+        return;
+      }
+
+      // Pisahkan email atau nomor telepon
+      const isEmail = emailOrPhone.includes('@');
+      const emailVal = isEmail ? emailOrPhone : '';
+      const phoneVal = !isEmail ? emailOrPhone : '';
+
+      const newUserId = db.tb_user && db.tb_user.length > 0 ? Math.max(...db.tb_user.map(u => u.id_user)) + 1 : 1;
+      const newUser = {
+        id_user: newUserId,
+        id_sekolah: schoolId,
+        id_role: 3, // Kasir
+        username: username,
+        password: password,
+        nama_lengkap: name,
+        email: emailVal,
+        no_telepon: phoneVal,
+        kontak: emailOrPhone,
+        role_name: 'kasir',
+        status: 'Pending',
+        is_active: 0,
+        created_at: new Date().toLocaleString('id-ID')
+      };
+      db.tb_user.push(newUser);
+
+      db.tb_approval_requests = db.tb_approval_requests || [];
+      const newRequestId = db.tb_approval_requests.length > 0 ? Math.max(...db.tb_approval_requests.map(r => r.id_request)) + 1 : 1;
+      const newReq = {
+        id_request: newRequestId,
+        id_user: newUserId,
+        nama_lengkap: name,
+        username: username,
+        email_or_phone: emailOrPhone,
+        password: password,
+        id_sekolah: schoolId,
+        requested_role: 'kasir',
+        status: 'pending',
+        created_at: new Date().toLocaleString('id-ID'),
+        notes: `Pendaftaran kasir baru (${emailOrPhone})`
+      };
+      db.tb_approval_requests.push(newReq);
+
+      saveDatabase();
+
+      showToast(`Pendaftaran Kasir "${name}" berhasil diajukan! Akun berstatus Pending menunggu persetujuan Admin.`, 'success');
+
+      // Isi otomatis form login dan alihkan ke form Login
+      document.getElementById('usernameInput').value = username;
+      document.getElementById('passwordInput').value = password;
+
+      setTimeout(() => {
+        switchToLogin();
+      }, 750);
+    }
+
+    // Inisialisasi Pilihan Sekolah dari Database
+    window.addEventListener('DOMContentLoaded', () => {
+      loadDatabase();
+      const loginSchoolSelect = document.getElementById('loginSchoolSelect');
+      const regSchoolSelect = document.getElementById('regSchoolSelect');
+
+      const schoolOptions = (db.tb_sekolah || []).map(s => `
+        <option value="${s.id_sekolah}">${s.nama_sekolah}</option>
+      `).join('');
+
+      if (loginSchoolSelect) loginSchoolSelect.innerHTML = schoolOptions;
+      if (regSchoolSelect) regSchoolSelect.innerHTML = schoolOptions;
+    });
   </script>
 </body>
 </html>

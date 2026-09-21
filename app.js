@@ -28,10 +28,10 @@ const INITIAL_DATABASE = {
   tb_sekolah: [
     {
       id_sekolah: 1,
-      kode_sekolah: 'SCH-001',
-      nama_sekolah: 'SMA Negeri 1 Harapan Bangsa',
-      alamat_sekolah: 'Jl. Pendidikan No. 45, Jakarta',
-      website: 'https://sman1harapanbangsa.sch.id',
+      kode_sekolah: 'SCH-TSM-002',
+      nama_sekolah: 'SMKN 2 Tasikmalaya',
+      alamat_sekolah: 'Jl. Noenoeng Tisnasaputra, Kahuripan, Tawang, Kota Tasikmalaya',
+      website: 'https://smkn2tasik.sch.id',
       is_active: 1,
       created_at: '2026-01-01 08:00:00'
     }
@@ -394,12 +394,8 @@ function playSound(type = 'beep') {
       osc.start();
       osc.stop(ctx.currentTime + 0.55);
     } else if (type === 'click') {
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(1200, ctx.currentTime);
-      gain.gain.setValueAtTime(0.05, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.05);
+      // Suara klik dinonaktifkan
+      return;
     } else if (type === 'error') {
       osc.type = 'sawtooth';
       osc.frequency.setValueAtTime(220, ctx.currentTime);
@@ -572,7 +568,7 @@ function enterMainApp() {
   document.getElementById('navUserAvatar').textContent = currentUser.nama_lengkap.charAt(0).toUpperCase();
 
   const sekolah = db.tb_sekolah[0] || {};
-  document.getElementById('navSchoolName').textContent = sekolah.nama_sekolah || 'SMA Negeri 1 Harapan Bangsa';
+  document.getElementById('navSchoolName').textContent = sekolah.nama_sekolah || 'SMKN 2 Tasikmalaya';
 
   renderDashboard();
   renderPosCatalog();
@@ -1723,8 +1719,8 @@ function showReceiptModal(saleData) {
   const kasir = db.tb_user.find(u => u.id_user === sale.id_user);
   const pelanggan = db.tb_pelanggan.find(p => p.id_pelanggan === sale.id_pelanggan);
 
-  document.getElementById('rcptSchoolTitle').textContent = sekolah.nama_sekolah || 'SMA NEGERI 1 HARAPAN BANGSA';
-  document.getElementById('rcptSchoolAddress').textContent = sekolah.alamat_sekolah || 'Jl. Pendidikan No. 45';
+  document.getElementById('rcptSchoolTitle').textContent = sekolah.nama_sekolah || 'SMKN 2 TASIKMALAYA';
+  document.getElementById('rcptSchoolAddress').textContent = sekolah.alamat_sekolah || 'Jl. Noenoeng Tisnasaputra, Kahuripan, Tawang, Kota Tasikmalaya';
   document.getElementById('rcptInvoiceNo').textContent = sale.nomor_faktur;
   document.getElementById('rcptDate').textContent = sale.tanggal_penjualan;
   document.getElementById('rcptCashier').textContent = kasir ? kasir.nama_lengkap : 'Kasir';
